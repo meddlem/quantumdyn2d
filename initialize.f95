@@ -18,8 +18,9 @@ contains
       x(i) = i*dx
     enddo
 
-    psi_0 = 0._dp
-    where(x<L/2) psi_0 = 1/sqrt(L/2._dp)*exp(cmplx(0._dp,k*x,dp))
+    psi_0 = 1/sqrt(L)*exp(cmplx(0._dp,k*x,dp))
+    psi_0(1) = 0._dp
+    psi_0(M) = 0._dp
   end subroutine
 
   subroutine init_V(V,x,L)
@@ -31,14 +32,15 @@ contains
 !    where(x>3*L/4) V = 1._dp
   end subroutine
     
-  subroutine init_ops(opp_d,opp_dl,opp_du,opm,V,dt,dx,M)
-    complex(dp), intent(inout) :: opp_d(:), opp_dl(:), opp_du(:), opm(:,:)
+  subroutine init_ops(opp_d,opp_du,opm,V,dt,dx,M)
+    complex(dp), intent(inout) :: opp_d(:), opp_du(:), opm(:,:)
     real(dp), intent(in)       :: V(:), dt, dx
     integer, intent(in)        :: M
 
-    integer :: i
+    integer :: i, j
+    character(30) :: rowfmt
 
-    opm = 0._dp
+    opm = cmplx(0._dp,0._dp,dp)
     ! construct operators 
     do i = 1,M
       opm(i,i) = cmplx(1._dp , (-dt*2._dp/(dx**2) - V(i))/2._dp , dp)
@@ -46,7 +48,6 @@ contains
 
       if (i>1) then
         opm(i,i-1) = cmplx(0._dp , dt*0.5_dp/(dx**2) , dp)
-        opp_dl(i-1) = cmplx(0._dp , -dt*0.5_dp/(dx**2) , dp)
       endif
 
       if (i<M) then
@@ -54,5 +55,12 @@ contains
         opp_du(i) = cmplx(0._dp , -dt*0.5_dp/(dx**2) , dp)
       endif
     enddo
+
+    write(rowfmt,'(A,I4,A)') '(',M,'(2X,F4.1,1X,F4.1))'
+
+    do i=1,M
+      write(*,rowfmt) (real(opm(i,j)),aimag(opm(i,j)),j=1,M)
+    enddo
+
   end subroutine
 end module 

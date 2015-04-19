@@ -6,43 +6,42 @@ module evolve
   public :: run_sim
 
 contains
-  subroutine run_sim(psi, x, L, n, M, opp_d, opp_dl, opp_du, opm)
-    complex(dp), intent(inout) :: psi(:), opp_d(:), opp_dl(:), opp_du(:), &
-      opm(:,:)
+  subroutine run_sim(psi, x, L, n, M, opp_d, opp_du, opm)
+    complex(dp), intent(inout) :: psi(:)
+    complex(dp), intent(in)    :: opp_d(:), opp_du(:), opm(:,:)
     real(dp), intent(in)       :: x(:), L
     integer, intent(in)        :: n, M
 
     integer :: i
 
     do i=1,n
-      call inc_time(psi, M, opp_d, opp_dl, opp_du, opm)
+      call inc_time(psi, M, opp_d, opp_du, opm)
 !      call plot_wavef(psi, x, M)
     enddo
-    call line_plot(x,abs(psi)**2,'x','P','','',2)
+    call line_plot(x,abs(psi)**2,'x','P','','',3)
 
   end subroutine
 
-  subroutine inc_time(psi, M, opp_d, opp_dl, opp_du, opm)
-    complex(dp), intent(inout) :: psi(:), opp_d(:), opp_dl(:), opp_du(:),&
-      opm(:,:)
+  subroutine inc_time(psi, M, opp_d, opp_du, opm)
+    complex(dp), intent(inout) :: psi(:)
+    complex(dp), intent(in)    :: opp_d(:), opp_du(:), opm(:,:)
     integer, intent(in) :: M
 
-    complex(dp), allocatable :: psi_tmp(:), opp_d_tmp(:), opp_dl_tmp(:), &
-      opp_du_tmp(:)
+    complex(dp), allocatable :: r(:), opp_d_tmp(:), opp_du_tmp(:)
     integer ::  info
 
-    allocate(opp_d_tmp(M),opp_dl_tmp(M),opp_du_tmp(M),psi_tmp(M))
+    allocate(opp_d_tmp(M),opp_du_tmp(M-1),r(M))
     
     ! create temp arrays
-    psi_tmp = matmul(opm,psi)
+    r = matmul(opm,psi)
     opp_d_tmp = opp_d
-    opp_dl_tmp = opp_dl
     opp_du_tmp = opp_du
 
     ! solve for psi at next timestep
-    call dgtsv(M,1,opp_dl_tmp,opp_d_tmp,opp_du_tmp,psi_tmp,M,info)
-    psi = psi_tmp
+    ! wrong routine..
+    call dgtsv(M,1,opp_du_tmp,opp_d_tmp,opp_du_tmp,r,M,info)
+    psi = r
 
-    deallocate(opp_d_tmp,opp_dl_tmp,opp_du_tmp,psi_tmp)
+    deallocate(opp_d_tmp,opp_du_tmp,r)
   end subroutine
 end module

@@ -14,7 +14,7 @@ contains
     ! create a gnuplot command file
     open(10,access = 'sequential',file = 'matplot.plt')
       write(10,*) 'set term wxt enhanced font "Verdana,10"' 
-      write(10,*) 'set style line 1 lt 1 lc rgb "red" lw 2 pt 1 ps 1'
+      write(10,*) 'set style line 1 lt 1 lc rgb "red" lw 2 pt 2 ps 0.6'
       write(10,*) 'load "loop.plt"'
     close(10)
     

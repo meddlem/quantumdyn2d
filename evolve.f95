@@ -6,44 +6,48 @@ module evolve
   public :: run_sim
 
 contains
-  subroutine run_sim(psi, x, L, n, M, opp_d, opp_du, opm)
+  subroutine run_sim(psi, x, L, n, M, opp_d, opp_u, opm)
     complex(dp), intent(inout) :: psi(:)
-    complex(dp), intent(in)    :: opp_d(:), opp_du(:), opm(:,:)
+    complex(dp), intent(in)    :: opp_d(:), opp_u(:), opm(:,:)
     real(dp), intent(in)       :: x(:), L
     integer, intent(in)        :: n, M
 
     integer :: i
 
     do i=1,n
-      call inc_time(psi, M, opp_d, opp_du, opm)
+      call inc_time(psi, M, opp_d, opp_u, opm)
       call plot_wavef(psi, x, M)
     enddo
   end subroutine
 
-  subroutine inc_time(psi, M, opp_d, opp_du, opm)
+  subroutine inc_time(psi, M, opp_d, opp_u, opm)
     complex(dp), intent(inout) :: psi(:)
-    complex(dp), intent(in)    :: opp_d(:), opp_du(:), opm(:,:)
+    complex(dp), intent(in)    :: opp_d(:), opp_u(:), opm(:,:)
     integer, intent(in) :: M
 
-    complex(dp), allocatable :: r(:), opp_d_tmp(:), opp_dl_tmp(:), opp_du_tmp(:)
+    complex(dp), allocatable :: r(:), opp_d_tmp(:), opp_l_tmp(:), opp_u_tmp(:)
     integer ::  info
 
-    allocate(opp_d_tmp(M),opp_dl_tmp(M-1),opp_du_tmp(M-1),r(M))
+    allocate(opp_d_tmp(M),opp_l_tmp(M-1),opp_u_tmp(M-1),r(M))
     
-    ! create temp arrays
+    ! define temp arrays
+    opp_d_tmp = opp_d
+    opp_u_tmp = opp_u
+    opp_l_tmp = opp_u
+    
+    ! explicit part of calculation
     r = matmul(opm,psi)
+
+    ! enforce bcs
     r(1) = (0._dp,0._dp)
     r(M) = (0._dp,0._dp)
 
-    opp_d_tmp = opp_d
-    opp_du_tmp = opp_du
-    opp_dl_tmp = opp_du
-
     ! solve for psi at next timestep
-    call zgtsv(M,1,opp_dl_tmp,opp_d_tmp,opp_du_tmp,r,M,info)
+    call zgtsv(M,1,opp_l_tmp,opp_d_tmp,opp_u_tmp,r,M,info)
+
     ! collect new psi 
     psi = r
 
-    deallocate(opp_d_tmp,opp_du_tmp,r)
+    deallocate(opp_d_tmp,opp_u_tmp,r)
   end subroutine
 end module

@@ -16,10 +16,8 @@ contains
 
     do i=1,n
       call inc_time(psi, M, opp_d, opp_du, opm)
-!      call plot_wavef(psi, x, M)
+      call plot_wavef(psi, x, M)
     enddo
-    call line_plot(x,abs(psi)**2,'x','P','','',3)
-
   end subroutine
 
   subroutine inc_time(psi, M, opp_d, opp_du, opm)
@@ -27,19 +25,23 @@ contains
     complex(dp), intent(in)    :: opp_d(:), opp_du(:), opm(:,:)
     integer, intent(in) :: M
 
-    complex(dp), allocatable :: r(:), opp_d_tmp(:), opp_du_tmp(:)
+    complex(dp), allocatable :: r(:), opp_d_tmp(:), opp_dl_tmp(:), opp_du_tmp(:)
     integer ::  info
 
-    allocate(opp_d_tmp(M),opp_du_tmp(M-1),r(M))
+    allocate(opp_d_tmp(M),opp_dl_tmp(M-1),opp_du_tmp(M-1),r(M))
     
     ! create temp arrays
     r = matmul(opm,psi)
+    r(1) = (0._dp,0._dp)
+    r(M) = (0._dp,0._dp)
+
     opp_d_tmp = opp_d
     opp_du_tmp = opp_du
+    opp_dl_tmp = opp_du
 
     ! solve for psi at next timestep
-    ! wrong routine..
-    call dgtsv(M,1,opp_du_tmp,opp_d_tmp,opp_du_tmp,r,M,info)
+    call zgtsv(M,1,opp_dl_tmp,opp_d_tmp,opp_du_tmp,r,M,info)
+    ! collect new psi 
     psi = r
 
     deallocate(opp_d_tmp,opp_du_tmp,r)

@@ -18,9 +18,9 @@ contains
       x(i) = i*dx
     enddo
 
-    psi_0 = 1/sqrt(L)*exp(cmplx(0._dp,k*x,dp))
-    psi_0(1) = 0._dp
-    psi_0(M) = 0._dp
+    psi_0 = exp(cmplx(0._dp,k*x,dp))
+    psi_0(1) = (0._dp,0._dp)
+    psi_0(M) = (0._dp,0._dp)
   end subroutine
 
   subroutine init_V(V,x,L)
@@ -29,7 +29,7 @@ contains
     
     V = 0._dp
     ! block potential
-!    where(x>3*L/4) V = 1._dp
+    where(x>3*L/4) V = 1._dp
   end subroutine
     
   subroutine init_ops(opp_d,opp_du,opm,V,dt,dx,M)
@@ -37,8 +37,8 @@ contains
     real(dp), intent(in)       :: V(:), dt, dx
     integer, intent(in)        :: M
 
-    integer :: i, j
-    character(30) :: rowfmt
+    integer :: i!, j
+    !character(30) :: rowfmt
 
     opm = cmplx(0._dp,0._dp,dp)
     ! construct operators 
@@ -56,11 +56,11 @@ contains
       endif
     enddo
 
-    write(rowfmt,'(A,I4,A)') '(',M,'(2X,F4.1,1X,F4.1))'
+!    write(rowfmt,'(A,I4,A)') '(',M,'(2X,F4.1,1X,F4.1))'
 
-    do i=1,M
-      write(*,rowfmt) (real(opm(i,j)),aimag(opm(i,j)),j=1,M)
-    enddo
+ !   do i=1,M
+ !     write(*,rowfmt) (real(opm(i,j)),aimag(opm(i,j)),j=1,M)
+ !   enddo
 
   end subroutine
 end module 

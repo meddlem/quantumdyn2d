@@ -13,22 +13,22 @@ program main
 
   ! set parameters
   k = 1._dp
-  dx = 1._dp
-  dt = 1._dp
+  dx = 0.01_dp
+  dt = 0.001_dp
   L = 3._dp
   M = floor(L/dx)
-  n = 2
+  n = 100000
 
   !call user_in(k,dx,dt,L,M)
   allocate(psi(M),x(M),V(M),opm(M,M),opp_d(M),opp_du(M-1))
   call init_wavef(psi,x,dx,k,L,M)
   call init_V(V,x,L)
   call init_ops(opp_d,opp_du,opm,V,dt,dx,M)
+  call animate_plot()
   call line_plot(x,abs(psi)**2,'x','P','','',1)
-!  call animate_plot()
 
   call run_sim(psi,x,L,n,M,opp_d,opp_du,opm)
   
-!  call close_plot()
+  call close_plot()
   deallocate(psi,x,V,opm,opp_d,opp_du)
 end program

@@ -13,14 +13,15 @@ contains
     
     ! create a gnuplot command file
     open(10,access = 'sequential',file = 'matplot.plt')
-      write(10,*) 'set term x11 enhanced font "Verdana,10"' 
+      write(10,*) 'set term wxt enhanced font "Verdana,10"' 
+      write(10,*) 'set style line 1 lt 1 lc rgb "red" lw 2 pt 1 ps 1'
       write(10,*) 'load "loop.plt"'
     close(10)
     
     ! create plot/animate instruction
     open(10,access = 'sequential', file = 'loop.plt')
-      write(10,*) 'plot "< cat plotfifo.dat"'
-      write(10,*) 'pause 0.2'
+      write(10,*) 'plot "< cat plotfifo.dat" with linespoints ls 1'
+      write(10,*) 'pause 0.1'
       write(10,*) 'reread'
     close(10)
     

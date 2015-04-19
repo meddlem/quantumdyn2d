@@ -1,6 +1,7 @@
 FC = gfortran
-FFLAGS = -ffast-math -Wall -march=native -O3 -fopenmp #-Warray-temporaries #compiler flags
+FFLAGS = -ffast-math -Wall -march=native -O3 -fopenmp -fbounds-check#-Warray-temporaries #compiler flags
 LDFLAGS = -fopenmp #link flags
+LIBS = -llapack
 
 COMPILE = $(FC) $(FFLAGS)
 LINK = $(FC) $(LDFLAGS)
@@ -9,6 +10,10 @@ PROG = main #program name
 
 #required objects: 
 OBJS =
+OBJS += constants.o
+OBJS += plotroutines.o
+OBJS += initialize.o
+OBJS += evolve.o
 OBJS += main.o
 
 all: $(PROG)

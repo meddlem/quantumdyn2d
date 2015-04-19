@@ -22,24 +22,14 @@ contains
     enddo
   end subroutine
 
-  subroutine user_in()
-    real(dp), intent(out) :: BJ
-    integer, intent(out)  :: L
-    logical, intent(in)   :: use_T
+  subroutine user_in(k,dx,dt,L,M)
+    real(dp), intent(out) :: k, dx, dt, L
+    integer, intent(out)  :: M
 
-    real(dp) :: T
   
     write(*,'(/,A,/)') '************ Input *************' 
-    if (use_T) then
-      write(*,'(A)',advance='no') "T = " 
-      read(*,*) T
-      BJ = 1._dp/T
-    else
-      write(*,'(A)',advance='no') "BJ = " 
-      read(*,*) BJ
-    endif
 
-    write(*,'(A)',advance='no') "L = " 
+    write(*,'(A)',advance='no') "dx = " 
     read(*,*) L
     write(*,'(A)') "Running simulation..."
 

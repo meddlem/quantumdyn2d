@@ -17,7 +17,7 @@ program main
   call init_wavef(psi,x,dx,L,k,M)
   call init_V(V,x,L)
   call init_ops(opp_d,opp_u,opm,V,dt,dx,M)
-  call animate_plot()
+  call animate_plot(L)
   call line_plot(x,abs(psi)**2,'x','P','','',1)
 
   call run_sim(psi,x,n,M,opp_d,opp_u,opm)

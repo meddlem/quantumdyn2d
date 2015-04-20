@@ -17,6 +17,7 @@ contains
     do i=1,n
       call inc_time(psi, M, opp_d, opp_u, opm)
       call plot_wavef(psi, x, M)
+      call sleep(1)
     enddo
   end subroutine
 

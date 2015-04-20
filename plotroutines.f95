@@ -5,23 +5,29 @@ module plotroutines
   public :: line_plot, plot_wavef, close_plot, animate_plot
 
 contains
-  subroutine animate_plot()
+  subroutine animate_plot(L)
+    real(dp), intent(in) :: L
     integer :: ret
     
     ! creates fifo pipe: plotfifo.dat
-    call system("rm -f plotfifo.dat; mkfifo plotfifo.dat",ret)     
+    call system("rm -f plotfifo.dat; mkfifo plotfifo.dat",ret)
     
     ! create a gnuplot command file
     open(10,access = 'sequential',file = 'matplot.plt')
       write(10,*) 'set term wxt enhanced font "Verdana,10"' 
       write(10,*) 'set style line 1 lt 1 lc rgb "red" lw 2 pt 2 ps 0.6'
+      write(10,*) 'set grid'
+      write(10,*) 'set xlabel "x"'
+      write(10,*) 'set ylabel "Psi^2"'
+      write(10,*) 'set xrange [0:',L,']'
+      write(10,*) 'set yrange [-1:1]'
       write(10,*) 'load "loop.plt"'
     close(10)
     
     ! create plot/animate instruction
     open(10,access = 'sequential', file = 'loop.plt')
-      write(10,*) 'plot "< cat plotfifo.dat" with linespoints ls 1'
-      write(10,*) 'pause 0.1'
+      write(10,*) 'plot "< cat plotfifo.dat" with lines ls 1'
+      write(10,*) 'pause 0.3'
       write(10,*) 'reread'
     close(10)
     

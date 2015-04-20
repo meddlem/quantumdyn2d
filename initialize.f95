@@ -21,7 +21,7 @@ contains
     ! psi_0 = sin(2*pi*x/L)*exp(cmplx(0._dp,k*x,dp))
     
     ! gaussian wavepacket
-    psi_0 = exp(-1.0_dp*(x-L/2)**2)*exp(cmplx(0._dp,k*x,dp))
+    psi_0 = exp(-1.0_dp*(x-L/3)**2)*exp(cmplx(0._dp,k*x,dp))
 
     ! normalize wavefunction
     psi_0 = psi_0/sqrt(sum(abs(psi_0)**2*dx))
@@ -32,11 +32,11 @@ contains
     real(dp), intent(inout) :: V(:)
     
     ! block/constant potential
-    ! V = 0._dp
-    ! where(x>2.6_dp .and. x<2.7_dp) V = 1._dp
+    V = 0._dp
+    where(x>78._dp .and. x<85._dp) V = 1._dp
     
     ! harmonic potential
-    V = 1._dp/32*(x-L/2)**2
+    !V = 1._dp/32*(x-L/2)**2
   end subroutine
     
   subroutine init_ops(opp_d,opp_u,opm,V,dt,dx,M)
@@ -49,16 +49,16 @@ contains
     opm = (0._dp,0._dp)
     ! construct operators 
     do i = 1,M
-      opm(i,i) = cmplx(1._dp , (-dt*2._dp/(dx**2) - V(i))/2._dp , dp)
-      opp_d(i) = cmplx(1._dp , (dt*2._dp/(dx**2) + V(i))/2._dp , dp)
+      opm(i,i) = cmplx(1._dp,((-dt*2._dp/(dx**2) - V(i))/2._dp), dp)
+      opp_d(i) = cmplx(1._dp, (dt*2._dp/(dx**2) + V(i))/2._dp, dp)
 
       if (i>1) then
-        opm(i,i-1) = cmplx(0._dp , dt*0.5_dp/(dx**2) , dp)
+        opm(i,i-1) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
       endif
 
       if (i<M) then
-        opm(i,i+1) = cmplx(0._dp , dt*0.5_dp/(dx**2) , dp)
-        opp_u(i) = cmplx(0._dp , -dt*0.5_dp/(dx**2) , dp)
+        opm(i,i+1) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
+        opp_u(i) = cmplx(0._dp, -dt*0.5_dp/(dx**2), dp)
       endif
     enddo
   end subroutine

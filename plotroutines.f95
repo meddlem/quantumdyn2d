@@ -29,7 +29,7 @@ contains
     ! create plot/animate instruction
     open(10,access = 'sequential', file = 'loop.plt')
       write(10,*) 'plot "< cat plotfifo.dat" using 1:2 with lines ls 1 title "Re(Psi)",\'
-      write(10,*) '"" using 1:3 with lines ls 2 title "Im(Psi)",\'
+!      write(10,*) '"" using 1:3 with lines ls 2 title "Im(Psi)",\'
       write(10,*) '"" using 1:4 with lines ls 3 title "P"'
       write(10,*) 'pause 0.01'
       write(10,*) 'reread'

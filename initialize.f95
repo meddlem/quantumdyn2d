@@ -20,8 +20,8 @@ contains
     ! isq well
     ! psi_0 = sin(2*pi*x/L)*exp(cmplx(0._dp,k*x,dp))
     
-    ! gaussian wavepacket
-    psi_0 = exp(-1.0_dp*(x-L/3)**2)*exp(cmplx(0._dp,k*x,dp))
+    ! gaussian wavepackets
+    psi_0 = exp(-0.5_dp*(x-L/3)**2)*exp(cmplx(0._dp,k*x,dp)) + exp(-0.5_dp*(x-2*L/3)**2)*exp(cmplx(0._dp,-k*x,dp))
 
     ! normalize wavefunction
     psi_0 = psi_0/sqrt(sum(abs(psi_0)**2*dx))
@@ -33,10 +33,10 @@ contains
     
     ! block/constant potential
     V = 0._dp
-    where(x>78._dp .and. x<85._dp) V = 1._dp
+    where(x>28._dp .and. x<32._dp) V = 2._dp
     
     ! harmonic potential
-    !V = 1._dp/32*(x-L/2)**2
+    !V = 1._dp/4*(x-L/2)**2
   end subroutine
     
   subroutine init_ops(opp_d,opp_u,opm,V,dt,dx,M)

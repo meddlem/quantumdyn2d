@@ -39,8 +39,8 @@ contains
     r = matmul(opm,psi)
 
     ! enforce fixed bcs
-    !r(1) = (0._dp,0._dp)
-    !r(M) = (0._dp,0._dp)
+    r(1) = (0._dp,0._dp)
+    r(M) = (0._dp,0._dp)
 
     ! solve for psi at next timestep
     call zgtsv(M,1,opp_l_tmp,opp_d_tmp,opp_u_tmp,r,M,info)

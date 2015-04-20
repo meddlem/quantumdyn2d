@@ -17,26 +17,26 @@ contains
       x(i) = i*dx
     enddo
 
-    !psi_0 = cmplx(sin(3*pi*x/L), 0._dp, dp) 
-    psi_0 = cmplx(exp(-1_dp*(x-L/2)**2),0._dp,dp)
-    ! enforce fixed bcs
-!    psi_0(1) = (0._dp,0._dp)
-!    psi_0(M) = (0._dp,0._dp)
+    ! isq well
+    !psi_0 = sin(2*pi*x/L)*exp(cmplx(0._dp,k*x,dp))
+    
+    ! gaussian wavepacket
+    psi_0 = exp(-1.0_dp*(x-L/2)**2)*exp(cmplx(0._dp,k*x,dp))
 
     ! normalize wavefunction
-    psi_0 = psi_0/sum(abs(psi_0)*dx)
+    psi_0 = psi_0/sqrt(sum(abs(psi_0)**2*dx))
   end subroutine
 
   subroutine init_V(V,x,L)
     real(dp), intent(in) :: x(:), L
     real(dp), intent(inout) :: V(:)
     
-!    V = 0._dp
-    ! block potential
+    ! block/constant potential
+    V = 0._dp
     ! where(x>2.6_dp .and. x<2.7_dp) V = 1._dp
     
     ! harmonic potential
-    V = 0.25_dp*(x-L/2)**2
+    !V = 0.125_dp*(x-L/2)**2
   end subroutine
     
   subroutine init_ops(opp_d,opp_u,opm,V,dt,dx,M)

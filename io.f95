@@ -5,6 +5,23 @@ module io
   public :: user_in
 contains
 
+  subroutine user_in(k,dx,dt,L,M,n)
+    real(dp), intent(out) :: k, dx, dt, L
+    integer, intent(out)  :: M, n
+    
+    ! set parameters
+    dx = 0.005_dp
+    dt = 0.01_dp
+    L = 20._dp
+    M = floor(L/dx)
+    n = 10000
+  
+    write(*,'(/,A,/)') '************ Input *************' 
+    write(*,'(A)',advance='no') "k = " 
+    read(*,*) k
+    write(*,'(A)') "Running simulation..."
+  end subroutine
+
 !  subroutine get_usr_args(use_T)
 !    logical, intent(out) :: use_T
 !    
@@ -20,21 +37,4 @@ contains
 !      endif
 !    enddo
 !  end subroutine
-
-  subroutine user_in(k,dx,dt,L,M,n)
-    real(dp), intent(out) :: k, dx, dt, L
-    integer, intent(out)  :: M, n
-    
-    ! set parameters
-    dx = 0.01_dp
-    dt = 0.01_dp
-    L = 20._dp
-    M = floor(L/dx)
-    n = 100000
-  
-    write(*,'(/,A,/)') '************ Input *************' 
-    write(*,'(A)',advance='no') "k = " 
-    read(*,*) k
-    write(*,'(A)') "Running simulation..."
-  end subroutine
 end module

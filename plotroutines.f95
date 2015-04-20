@@ -20,14 +20,14 @@ contains
       write(10,*) 'set xlabel "x"'
       write(10,*) 'set ylabel "Psi^2"'
       write(10,*) 'set xrange [0:',L,']'
-      write(10,*) 'set yrange [-1:1]'
+      write(10,*) 'set yrange [0:1]'
       write(10,*) 'load "loop.plt"'
     close(10)
     
     ! create plot/animate instruction
     open(10,access = 'sequential', file = 'loop.plt')
-      write(10,*) 'plot "< cat plotfifo.dat" with lines ls 1'
-      write(10,*) 'pause 0.3'
+      write(10,*) 'plot "< cat plotfifo.dat" with lines ls 1 notitle'
+      write(10,*) 'pause 0.01'
       write(10,*) 'reread'
     close(10)
     

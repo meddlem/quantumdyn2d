@@ -6,24 +6,25 @@ module initialize
 
 contains
   
-  subroutine init_wavef(psi_0,x,dx,k,M)
+  subroutine init_wavef(psi_0,x,dx,L,k,M)
     complex(dp), intent(inout) :: psi_0(:) 
     real(dp), intent(inout)    :: x(:)
-    real(dp), intent(in)       :: dx, k
+    real(dp), intent(in)       :: dx, L, k
     integer, intent(in)        :: M
-
     integer :: i
     
     do i = 1,M
       x(i) = i*dx
     enddo
 
-    psi_0 = exp(cmplx(0._dp,k*x,dp))
-    psi_0(1) = (0._dp,0._dp)
-    psi_0(M) = (0._dp,0._dp)
+    psi_0 = cmplx(sin(2*pi*x/L), 0._dp, dp) 
 
-    ! normalize
-    psi_0 = psi_0/sum(abs(psi_0)**2*dx)
+    ! enforce fixed bcs
+    ! psi_0(1) = (0._dp,0._dp)
+    ! psi_0(M) = (0._dp,0._dp)
+
+    ! normalize wavefunction
+    psi_0 = psi_0/sum(abs(psi_0)*dx)
   end subroutine
 
   subroutine init_V(V,x,L)
@@ -32,7 +33,10 @@ contains
     
     V = 0._dp
     ! block potential
-    where(x>3*L/4) V = 1._dp
+    ! where(x>2.6_dp .and. x<2.7_dp) V = 1._dp
+    
+    ! harmonic potential
+    ! V = 2*(x-L/2)**2
   end subroutine
     
   subroutine init_ops(opp_d,opp_u,opm,V,dt,dx,M)

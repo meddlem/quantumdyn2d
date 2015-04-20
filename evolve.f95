@@ -6,10 +6,10 @@ module evolve
   public :: run_sim
 
 contains
-  subroutine run_sim(psi, x, L, n, M, opp_d, opp_u, opm)
+  subroutine run_sim(psi, x, n, M, opp_d, opp_u, opm)
     complex(dp), intent(inout) :: psi(:)
     complex(dp), intent(in)    :: opp_d(:), opp_u(:), opm(:,:)
-    real(dp), intent(in)       :: x(:), L
+    real(dp), intent(in)       :: x(:)
     integer, intent(in)        :: n, M
 
     integer :: i
@@ -38,9 +38,9 @@ contains
     ! explicit part of calculation
     r = matmul(opm,psi)
 
-    ! enforce bcs
-    r(1) = (0._dp,0._dp)
-    r(M) = (0._dp,0._dp)
+    ! enforce fixed bcs
+    !r(1) = (0._dp,0._dp)
+    !r(M) = (0._dp,0._dp)
 
     ! solve for psi at next timestep
     call zgtsv(M,1,opp_l_tmp,opp_d_tmp,opp_u_tmp,r,M,info)

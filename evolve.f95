@@ -37,15 +37,15 @@ contains
     complex(dp), allocatable :: g_x(:), g_y(:), A_x_d_tmp(:), A_x_l_tmp(:), &
                                 A_x_u_tmp(:), A_y_d_tmp(:), A_y_l_tmp(:), &
                                 A_y_u_tmp(:)
-    complex(dp)              :: alp, bt
+    complex(dp)              :: one, zero
     integer                  :: i, info
 
     allocate(A_x_d_tmp(M_x), A_x_l_tmp(M_x-1), A_x_u_tmp(M_x-1), g_x(M_x), &
       A_y_d_tmp(M_y), A_y_l_tmp(M_y-1), A_y_u_tmp(M_y-1), g_y(M_y))
 
     ! init
-    alp = (1._dp,0._dp)
-    bt = (0._dp,0._dp)
+    one = (1._dp,0._dp)
+    zero = (0._dp,0._dp)
     
     ! horizontal sweep
 
@@ -57,8 +57,8 @@ contains
       A_x_l_tmp = A_x_u(:,i)
 
       ! explicit part of calculation
-      call zgbmv('N',M_x,M_x,1,1,alp,A_x_conj(:,:,i),3,psi(:,i),1,bt,g_x,1)
-      ! g_x = matmul(A_x_conj(:,:,i),psi(:,i))
+      call zgbmv('N',M_x,M_x,1,1,one,A_x_conj(:,:,i),3,psi(:,i),1,zero,g_x,1)
+     ! g_x = matmul(A_x_conj(:,:,i),psi(:,i))
 
       ! solve for psi at t=n+1/2
       call zgtsv(M_x,1,A_x_l_tmp,A_x_d_tmp,A_x_u_tmp,g_x,M_x,info)
@@ -77,7 +77,7 @@ contains
 
       ! explicit part of calculation
       !g_y = matmul(A_y_conj(:,:,i),psi(i,:))
-      call zgbmv('N',M_x,M_y,1,1,alp,A_y_conj(:,:,i),3,psi(i,:),1,bt,g_y,1)
+      call zgbmv('N',M_y,M_y,1,1,one,A_y_conj(:,:,i),3,psi(i,:),1,zero,g_y,1)
 
       ! solve for psi at t=n+1
       call zgtsv(M_y,1,A_y_l_tmp,A_y_d_tmp,A_y_u_tmp,g_y,M_y,info)

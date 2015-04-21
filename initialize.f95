@@ -95,11 +95,11 @@ contains
         A_x_conj(2,i,j) = conjg(A_x_d(i,j))
         
         if (i>1) then
-          A_x_conj(1,i-1,j) = conjg(A_x_u(i-1,j))
+          A_x_conj(3,i-1,j) = conjg(A_x_u(i-1,j))
         endif
         
         if (i<M_x) then
-          A_x_conj(3,i+1,j) = conjg(A_x_u(i,j))
+          A_x_conj(1,i+1,j) = conjg(A_x_u(i,j))
         endif
       enddo
     enddo
@@ -109,11 +109,11 @@ contains
         A_y_conj(2,i,j) = conjg(A_y_d(i,j))
         
         if (i>1) then
-          A_y_conj(1,i-1,j) = conjg(A_y_u(i-1,j))
+          A_y_conj(3,i-1,j) = conjg(A_y_u(i-1,j))
         endif
         
         if (i<M_y) then
-          A_y_conj(3,i+1,j) = conjg(A_y_u(i,j))
+          A_y_conj(1,i+1,j) = conjg(A_y_u(i,j))
         endif
       enddo
     enddo

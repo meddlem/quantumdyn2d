@@ -23,7 +23,7 @@ program main
   call init_V(V,x,y,L_x,L_y)
   call init_ops(A_x_d,A_y_d,A_x_u,A_y_u,A_x_conj,A_y_conj,V,dt,dx,M_x,M_y)
   call animate_plot(L_x,L_y)
-  
+
   call run_sim(psi,x,y,n,M_x,M_y,A_x_d,A_y_d,A_x_u,A_y_u,A_x_conj,A_y_conj)
   
   call close_plot()

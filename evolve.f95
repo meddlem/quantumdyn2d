@@ -21,7 +21,7 @@ contains
       call inc_time(psi, M, A_x_d, A_y_d, A_u, A_x_conj, A_y_conj)
       
       if (mod(i,30)==0) then
-        call plot_wavef(psi, x, y, V, M)
+        call plot_wavef(psi, x, y, V, M, M)
       endif
     enddo
   end subroutine

@@ -5,15 +5,17 @@ module io
   public :: user_in
 contains
 
-  subroutine user_in(k_x,k_y,dx,dt,L,M,n)
-    real(dp), intent(out) :: k_x, k_y, dx, dt, L
-    integer, intent(out)  :: M, n
+  subroutine user_in(k_x,k_y,dx,dt,L_x,L_y,M_x,M_y,n)
+    real(dp), intent(out) :: k_x, k_y, dx, dt, L_x, L_y
+    integer, intent(out)  :: M_x, M_y, n
     
     ! set parameters
     dx = 0.15_dp
     dt = 0.1_dp
-    L = 15._dp
-    M = floor(L/dx)
+    L_x = 15._dp
+    L_y = 15._dp
+    M_x = floor(L_x/dx)
+    M_y = floor(L_y/dx)
     n = 5000
   
     write(*,'(/,A,/)') '************ Input *************' 
@@ -23,20 +25,4 @@ contains
     read(*,*) k_y
     write(*,'(A)') "Running simulation..."
   end subroutine
-
-!  subroutine get_usr_args(use_T)
-!    logical, intent(out) :: use_T
-!    
-!    character(10) :: arg
-!    integer       :: i
-!
-!    use_T = .false. ! by default use betaJ for input
-!    
-!    do i=1,iargc()
-!      call getarg(i,arg)
-!      if (trim(arg) == '-T') then
-!        use_T = .true.
-!      endif
-!    enddo
-!  end subroutine
 end module

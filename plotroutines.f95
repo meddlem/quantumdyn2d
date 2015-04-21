@@ -5,8 +5,8 @@ module plotroutines
   public :: line_plot, plot_wavef, close_plot, animate_plot
 
 contains
-  subroutine animate_plot(L)
-    real(dp), intent(in) :: L
+  subroutine animate_plot(L_x,L_y)
+    real(dp), intent(in) :: L_x, L_y
     integer :: ret
     
     ! creates fifo pipe: plotfifo.dat
@@ -24,8 +24,8 @@ contains
       write(10,*) 'set hidden3d'
       write(10,*) 'set xlabel "x"'
       write(10,*) 'set ylabel "y"'
-      write(10,*) 'set xrange [0:',L,']'
-      write(10,*) 'set yrange [0:',L,']'
+      write(10,*) 'set xrange [0:',L_x,']'
+      write(10,*) 'set yrange [0:',L_y,']'
       !write(10,*) 'set zrange [0:0.2]'
       write(10,*) 'load "loop.plt"'
     close(10)
@@ -42,10 +42,10 @@ contains
     call system("gnuplot matplot.plt &",ret)
   end subroutine
   
-  subroutine plot_wavef(psi, x, y, V, M)
+  subroutine plot_wavef(psi, x, y, V, M_x, M_y)
     complex(dp), intent(in) :: psi(:,:)
     real(dp), intent(in)    :: x(:,:), y(:,:), V(:,:)
-    integer, intent(in)     :: M
+    integer, intent(in)     :: M_x, M_y
 
     integer :: i, j
     character(50) :: rfmt
@@ -53,8 +53,8 @@ contains
     rfmt = '(F10.5,5X,F10.5,5X,F10.5,5X,F10.5)' 
     
     open(11,access = 'sequential',status = 'replace',file = 'plotfifo.dat')
-      do i = 1,M
-        do j = 1,M
+      do i = 1,M_x
+        do j = 1,M_y
           write(11,rfmt) x(i,j), y(i,j), abs(psi(i,j))**2, V(i,j) ! write plot data to pipe 
         enddo
       enddo

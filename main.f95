@@ -20,7 +20,7 @@ program main
   call animate_plot(L)
   call line_plot(x,abs(psi)**2,'x','P','','',1)
 
-  call run_sim(psi,x,n,M,opp_d,opp_u,opm)
+  call run_sim(psi,x,V,n,M,opp_d,opp_u,opm)
   
   call close_plot()
   deallocate(psi,x,V,opm,opp_d,opp_u)

@@ -6,17 +6,17 @@ module evolve
   public :: run_sim
 
 contains
-  subroutine run_sim(psi, x, n, M, opp_d, opp_u, opm)
+  subroutine run_sim(psi, x, V, n, M, opp_d, opp_u, opm)
     complex(dp), intent(inout) :: psi(:)
     complex(dp), intent(in)    :: opp_d(:), opp_u(:), opm(:,:)
-    real(dp), intent(in)       :: x(:)
+    real(dp), intent(in)       :: x(:), V(:)
     integer, intent(in)        :: n, M
 
     integer :: i
 
     do i=1,n
       call inc_time(psi, M, opp_d, opp_u, opm)
-      call plot_wavef(psi, x, M)
+      call plot_wavef(psi, x, V, M)
     enddo
   end subroutine
 

@@ -21,9 +21,14 @@ contains
       enddo
     enddo
 
-    ! gaussian wavepackets
-    psi = exp(-0.5_dp*((x-L/2)**2 + (y-L/2)**2)) * &
+    ! ISQW wavefunction
+
+    psi = cmplx(sin(pi*x/L)*sin(pi*y/L),0._dp,dp) * &
       exp(cmplx(0._dp,k_x*x+k_y*y,dp))
+
+    ! gaussian wavepackets
+    !psi = exp(-0.5_dp*((x-L/2)**2 + (y-L/2)**2)) * &
+    !  exp(cmplx(0._dp,k_x*x+k_y*y,dp))
 
     ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*dx**2))
@@ -52,9 +57,8 @@ contains
     A_conj = (0._dp,0._dp)
 
     do i = 1,M
-      A_conj(i,i) = cmplx(1._dp, 0.5_dp*dt*(-2._dp/(dx**2) - &
-        0.5_dp*V(i,j)), dp)
-      A_d(i) = cmplx(1._dp, 0.5_dp*dt*(2._dp/(dx**2) + V(i,j)), dp)
+      A_conj(i,i) = cmplx(1._dp, 0.5_dp*dt*(-2._dp/(dx**2)), dp)
+      A_d(i) = cmplx(1._dp, 0.5_dp*dt*2._dp/(dx**2), dp)
 
       if (i>1) then
         A_conj(i,i-1) = cmplx(0._dp, 0.5_dp*dt/(dx**2), dp)

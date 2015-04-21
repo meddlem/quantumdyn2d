@@ -10,11 +10,11 @@ contains
     integer, intent(out)  :: M, n
     
     ! set parameters
-    dx = 0.01_dp
+    dx = 0.05_dp
     dt = 0.025_dp
-    L = 60._dp
+    L = 6._dp
     M = floor(L/dx)
-    n = 5000
+    n = 500
   
     write(*,'(/,A,/)') '************ Input *************' 
     write(*,'(A)',advance='no') "k_x = " 

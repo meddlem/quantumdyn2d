@@ -12,7 +12,7 @@ program main
   integer  :: M, n
 
   call user_in(k_x,k_y,dx,dt,L,M,n)
-  allocate(psi(M),x(M,M),y(M,M),V(M,M),A_conj(M,M),A_d(M),A_u(M-1))
+  allocate(psi(M,M),x(M,M),y(M,M),V(M,M),A_conj(M,M),A_d(M),A_u(M-1))
   
   call init_wavef(psi,x,y,dx,L,k_x,k_y,M)
   call init_V(V,x,y,L)
@@ -22,5 +22,5 @@ program main
   call run_sim(psi,x,y,V,n,M,A_d,A_u,A_conj)
   
   call close_plot()
-  deallocate(psi,x,y,V,opm,opp_d,opp_u)
+  deallocate(psi,x,y,V,A_conj,A_d,A_u)
 end program

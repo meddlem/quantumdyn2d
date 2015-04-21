@@ -7,12 +7,12 @@ module evolve
   public :: run_sim
 
 contains
-  subroutine run_sim(psi, x, y, V, n, M_x, M_y, A_x_d, A_y_d, A_x_u, A_y_u, &
+  subroutine run_sim(psi, x, y, n, M_x, M_y, A_x_d, A_y_d, A_x_u, A_y_u, &
       A_x_conj, A_y_conj)
     complex(dp), intent(inout) :: psi(:,:)
     complex(dp), intent(in)    :: A_x_d(:,:), A_y_d(:,:), A_x_u(:,:), &
-      A_y_u(:,:), A_x_conj(:,:,:), A_y_conj(:,:,:)
-    real(dp), intent(in)       :: x(:,:), y(:,:), V(:,:)
+                                  A_y_u(:,:), A_x_conj(:,:,:), A_y_conj(:,:,:)
+    real(dp), intent(in)       :: x(:,:), y(:,:)
     integer, intent(in)        :: n, M_x, M_y
 
     integer :: i
@@ -22,7 +22,7 @@ contains
         A_y_conj)
       
       if (mod(i,30)==0) then
-        call plot_wavef(psi, x, y, V, M_x, M_y)
+        call plot_wavef(psi, x, y, M_x, M_y)
       endif
     enddo
   end subroutine
@@ -31,19 +31,19 @@ contains
       A_y_conj)
     complex(dp), intent(inout) :: psi(:,:)
     complex(dp), intent(in)    :: A_x_d(:,:), A_y_d(:,:), A_x_u(:,:), &
-      A_y_u(:,:), A_x_conj(:,:,:), A_y_conj(:,:,:) 
+                                  A_y_u(:,:), A_x_conj(:,:,:), A_y_conj(:,:,:)
     integer, intent(in)        :: M_x, M_y
 
     complex(dp), allocatable :: g_x(:), g_y(:), A_x_d_tmp(:), A_x_l_tmp(:), &
-      A_x_u_tmp(:), A_y_d_tmp(:), A_y_l_tmp(:), A_y_u_tmp(:)
-    integer :: i, info
+                                A_x_u_tmp(:), A_y_d_tmp(:), A_y_l_tmp(:), &
+                                A_y_u_tmp(:)
+    integer                  :: i, info
 
-    allocate(A_x_d_tmp(M_x),A_x_l_tmp(M_x-1),A_x_u_tmp(M_x-1),g_x(M_x))
-    allocate(A_y_d_tmp(M_y),A_y_l_tmp(M_y-1),A_y_u_tmp(M_y-1),g_y(M_y))
+    allocate(A_x_d_tmp(M_x), A_x_l_tmp(M_x-1), A_x_u_tmp(M_x-1), g_x(M_x), &
+      A_y_d_tmp(M_y), A_y_l_tmp(M_y-1), A_y_u_tmp(M_y-1), g_y(M_y))
     
-    ! modify lapack routine, so temp arrays are not needed? 
-
     ! horizontal sweep
+
     !$omp parallel do private(A_x_d_tmp,A_x_u_tmp,A_x_l_tmp,g_x)
     do i=1,M_y
       ! define needed temp arrays
@@ -61,6 +61,7 @@ contains
     !$omp end parallel do
 
     ! vertical sweep
+    
     !$omp parallel do private(A_y_d_tmp,A_y_u_tmp,A_y_l_tmp,g_y)
     do i=1,M_x
       ! define needed temp arrays
@@ -77,6 +78,7 @@ contains
     enddo
     !$omp end parallel do
 
-    !deallocate(A_d_tmp,A_l_tmp,A_u_tmp,g)
+    deallocate(A_x_d_tmp,A_x_l_tmp,A_x_u_tmp,A_y_d_tmp,A_y_l_tmp,A_y_u_tmp,&
+      g_x,g_y)
   end subroutine
 end module

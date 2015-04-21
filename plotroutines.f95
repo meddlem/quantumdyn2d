@@ -42,20 +42,20 @@ contains
     call system("gnuplot matplot.plt &",ret)
   end subroutine
   
-  subroutine plot_wavef(psi, x, y, V, M_x, M_y)
+  subroutine plot_wavef(psi, x, y, M_x, M_y)
     complex(dp), intent(in) :: psi(:,:)
-    real(dp), intent(in)    :: x(:,:), y(:,:), V(:,:)
+    real(dp), intent(in)    :: x(:,:), y(:,:)
     integer, intent(in)     :: M_x, M_y
 
     integer :: i, j
     character(50) :: rfmt
 
-    rfmt = '(F10.5,5X,F10.5,5X,F10.5,5X,F10.5)' 
+    rfmt = '(F10.5,5X,F10.5,5X,F10.5)' 
     
     open(11,access = 'sequential',status = 'replace',file = 'plotfifo.dat')
       do i = 1,M_x
         do j = 1,M_y
-          write(11,rfmt) x(i,j), y(i,j), abs(psi(i,j))**2, V(i,j) ! write plot data to pipe 
+          write(11,rfmt) x(i,j), y(i,j), abs(psi(i,j))**2 ! write plot data to pipe 
         enddo
       enddo
     close(11)

@@ -6,14 +6,14 @@ module initialize
 
 contains
   
-  subroutine init_wavef(psi,x,y,dx,L_x,L_y,k_x,k_y,M_x,M_y)
+  subroutine init_wavef(psi, x, y, dx, L_x, L_y, k_x, k_y, M_x, M_y)
     complex(dp), intent(inout) :: psi(:,:) 
     real(dp), intent(inout)    :: x(:,:), y(:,:)
     real(dp), intent(in)       :: dx, L_x, L_y, k_x, k_y
     integer, intent(in)        :: M_x, M_y
     
     real(dp), allocatable :: r(:,:)
-    integer  :: i, j
+    integer               :: i, j
 
     allocate(r(M_x,M_y))
     
@@ -42,8 +42,8 @@ contains
     deallocate(r)
   end subroutine
 
-  subroutine init_V(V,x,y,L_x,L_y)
-    real(dp), intent(in) :: x(:,:), y(:,:), L_x, L_y
+  subroutine init_V(V, x, y, L_x, L_y)
+    real(dp), intent(in)    :: x(:,:), y(:,:), L_x, L_y
     real(dp), intent(inout) :: V(:,:)
     
     ! block/scattering potential
@@ -54,19 +54,19 @@ contains
     V = 1._dp*((x-L_x/2)**2 + (y-L_y/2)**2)
   end subroutine
     
-  subroutine init_ops(A_x_d,A_y_d,A_x_u,A_y_u,A_x_conj,A_y_conj,V,dt,dx,&
-      M_x,M_y)
+  subroutine init_ops(A_x_d, A_y_d, A_x_u, A_y_u, A_x_conj, A_y_conj, V, dt,& 
+      dx, M_x, M_y)
     complex(dp), intent(inout) :: A_x_d(:,:), A_y_d(:,:), A_x_u(:,:), &
-      A_y_u(:,:), A_x_conj(:,:,:), A_y_conj(:,:,:)
+                                  A_y_u(:,:), A_x_conj(:,:,:), A_y_conj(:,:,:)
     real(dp), intent(in)       :: V(:,:), dt, dx
     integer, intent(in)        :: M_x, M_y
 
     integer :: i, j
 
-    ! construct matrix operators
     A_x_conj = (0._dp,0._dp)
     A_y_conj = (0._dp,0._dp)
 
+    ! construct matrix operators, x-dir
     do i = 1,M_x
       do j = 1,M_y
         A_x_conj(i,i,j) = &
@@ -85,6 +85,7 @@ contains
       enddo
     enddo
     
+    ! construct matrix operators, y-dir
     do i = 1,M_y
       do j = 1,M_x
         A_y_conj(i,i,j) = &
@@ -102,5 +103,6 @@ contains
         endif
       enddo
     enddo
+
   end subroutine
 end module 

@@ -9,7 +9,7 @@ contains
     real(dp), intent(out) :: k_x, k_y, dx, dt, L_x, L_y
     integer, intent(out)  :: M_x, M_y, n
     
-    ! set parameters
+    ! set model parameters
     dx = 0.15_dp
     dt = 0.1_dp
     L_x = 20._dp

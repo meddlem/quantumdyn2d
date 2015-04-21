@@ -21,7 +21,7 @@ contains
     ! psi_0 = sin(2*pi*x/L)*exp(cmplx(0._dp,k*x,dp))
     
     ! gaussian wavepackets
-    psi = exp(-0.5_dp*(x-L/2)**2)*exp(cmplx(0._dp,k*x,dp)) !+ &
+    psi = (x-L/2)*exp(-0.5_dp*(x-L/2)**2)*exp(cmplx(0._dp,k*x,dp)) !+ &
  !     exp(-0.5_dp*(x-2*L/3)**2)*exp(cmplx(0._dp,-k*x,dp))
 
     ! normalize wavefunction

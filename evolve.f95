@@ -17,7 +17,7 @@ contains
     do i=1,n
       call inc_time(psi, M, A_d, A_u, A_conj)
       
-      if (mod(i,10)==0) then
+      if (mod(i,1)==0) then
         call plot_wavef(psi, x, y, V, M)
       endif
     enddo

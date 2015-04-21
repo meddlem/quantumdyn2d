@@ -11,7 +11,11 @@ contains
     real(dp), intent(inout)    :: x(:,:), y(:,:)
     real(dp), intent(in)       :: dx, L, k_x, k_y
     integer, intent(in)        :: M
-    integer :: i, j
+    
+    real(dp), allocatable :: r(:,:), H_xy(:,:)
+    integer  :: i, j
+
+    allocate(r(M,M),H_xy(M,M))
     
     ! create grid
     do i = 1,M
@@ -20,18 +24,22 @@ contains
         y(i,j) = j*dx
       enddo
     enddo
+    
+    ! distance to grid center
+    r = sqrt((x-L/3)**2 + (y-L/2)**2) 
 
     ! ISQW wavefunction
-
     !psi = cmplx(sin(3*pi*x/L)*sin(2*pi*y/L),0._dp,dp) * &
     !  exp(cmplx(0._dp,k_x*x+k_y*y,dp))
 
     ! gaussian wavepackets
-    psi = exp(-0.5_dp*((x-L/2)**2 + (y-L/2)**2)) * &
-      exp(cmplx(0._dp,k_x*x+k_y*y,dp))
+    H_xy = (x-L/2)*(y-L/2)
+    psi = exp(-5*0.5_dp*r**2)*exp(cmplx(0._dp,k_x*x+k_y*y,dp))
 
     ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*dx**2))
+
+    deallocate(r,H_xy)
   end subroutine
 
   subroutine init_V(V,x,y,L)
@@ -39,11 +47,11 @@ contains
     real(dp), intent(inout) :: V(:,:)
     
     ! block/scattering potential
-    !V = 0._dp
-    !where(28._dp<x .and. x<32._dp) V = 1._dp
+    V = 0._dp
+    where(9._dp<x .and. x<13._dp) V = 80._dp
     
     ! harmonic potential
-    V = 1._dp*((x-L/2)**2 + (y-L/2)**2)
+    !V = 1._dp*((x-L/2)**2 + (y-L/2)**2)
   end subroutine
     
   subroutine init_ops(A_d,A_u,A_conj,V,dt,dx,M)

@@ -22,8 +22,8 @@ contains
       !write(10,*) 'set dgrid3d'
       !write(10,*) 'set pm3d interpolate 10,10'
       write(10,*) 'set hidden3d'
-      !write(10,*) 'set xlabel "x"'
-      !write(10,*) 'set ylabel "Psi^2"'
+      write(10,*) 'set xlabel "x"'
+      write(10,*) 'set ylabel "y"'
       write(10,*) 'set xrange [0:',L,']'
       write(10,*) 'set yrange [0:',L,']'
       !write(10,*) 'set zrange [0:0.2]'
@@ -32,7 +32,8 @@ contains
     
     ! create plot/animate instruction
     open(10,access = 'sequential', file = 'loop.plt')
-      write(10,*) 'splot "< cat plotfifo.dat" using 1:2:3 with lines' !with lines
+      write(10,*) 'splot "< cat plotfifo.dat" using 1:2:3 with lines,\' !with lines
+      write(10,*) '"" using 1:2:4 with lines' !with lines
       write(10,*) 'pause 0.2'
       write(10,*) 'reread'
     close(10)

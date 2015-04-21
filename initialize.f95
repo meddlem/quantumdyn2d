@@ -12,10 +12,10 @@ contains
     real(dp), intent(in)       :: dx, L_x, L_y, k_x, k_y
     integer, intent(in)        :: M_x, M_y
     
-    real(dp), allocatable :: r(:,:)
+    real(dp), allocatable :: r(:,:), H_xy(:,:)
     integer               :: i, j
 
-    allocate(r(M_x,M_y))
+    allocate(r(M_x,M_y),H_xy(M_x,M_y))
     
     ! create grid
     do i = 1,M_x
@@ -33,8 +33,8 @@ contains
     !  exp(cmplx(0._dp,k_x*x+k_y*y,dp))
 
     ! gaussian wavepackets
-    !H_xy = (x-L/2)*(y-L/2)
-    psi = exp(-0.5_dp*r**2)*exp(cmplx(0._dp,k_x*x+k_y*y,dp))
+    H_xy = (x-L_x/2)*(y-L_y/2)**1
+    psi = H_xy*exp(-0.5_dp*r**2)*exp(cmplx(0._dp,k_x*x+k_y*y,dp))
 
     ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*dx**2))

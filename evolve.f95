@@ -48,7 +48,6 @@ contains
     zero = (0._dp,0._dp)
     
     ! horizontal sweep
-
     !$omp parallel do private(A_x_d_tmp,A_x_u_tmp,A_x_l_tmp,g_x)
     do i=1,M_y
       ! define needed temp arrays
@@ -58,7 +57,6 @@ contains
 
       ! explicit part of calculation
       call zgbmv('N',M_x,M_x,1,1,one,A_x_conj(:,:,i),3,psi(:,i),1,zero,g_x,1)
-     ! g_x = matmul(A_x_conj(:,:,i),psi(:,i))
 
       ! solve for psi at t=n+1/2
       call zgtsv(M_x,1,A_x_l_tmp,A_x_d_tmp,A_x_u_tmp,g_x,M_x,info)
@@ -67,7 +65,6 @@ contains
     !$omp end parallel do
 
     ! vertical sweep
-    
     !$omp parallel do private(A_y_d_tmp,A_y_u_tmp,A_y_l_tmp,g_y)
     do i=1,M_x
       ! define needed temp arrays
@@ -76,7 +73,6 @@ contains
       A_y_l_tmp = A_y_u(:,i)
 
       ! explicit part of calculation
-      !g_y = matmul(A_y_conj(:,:,i),psi(i,:))
       call zgbmv('N',M_y,M_y,1,1,one,A_y_conj(:,:,i),3,psi(i,:),1,zero,g_y,1)
 
       ! solve for psi at t=n+1

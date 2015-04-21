@@ -26,7 +26,7 @@ contains
     enddo
     
     ! distance to grid center
-    r = sqrt((x-L/3)**2 + (y-L/2)**2) 
+    r = sqrt((x-L/2)**2 + (y-L/2)**2) 
 
     ! ISQW wavefunction
     !psi = cmplx(sin(3*pi*x/L)*sin(2*pi*y/L),0._dp,dp) * &
@@ -34,7 +34,7 @@ contains
 
     ! gaussian wavepackets
     H_xy = (x-L/2)*(y-L/2)
-    psi = exp(-5*0.5_dp*r**2)*exp(cmplx(0._dp,k_x*x+k_y*y,dp))
+    psi = H_xy*exp(-0.5_dp*r**2)*exp(cmplx(0._dp,k_x*x+k_y*y,dp))
 
     ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*dx**2))
@@ -47,34 +47,39 @@ contains
     real(dp), intent(inout) :: V(:,:)
     
     ! block/scattering potential
-    V = 0._dp
-    where(9._dp<x .and. x<13._dp) V = 80._dp
+    !V = 0._dp
+    !where(9._dp<x .and. x<13._dp) V = 80._dp
     
     ! harmonic potential
-    !V = 1._dp*((x-L/2)**2 + (y-L/2)**2)
+    V = 1._dp*((x-L/2)**2 + (y-L/2)**2)
   end subroutine
     
-  subroutine init_ops(A_d,A_u,A_conj,V,dt,dx,M)
-    complex(dp), intent(inout) :: A_d(:,:), A_u(:,:), A_conj(:,:,:)
+  subroutine init_ops(A_x_d,A_y_d,A_u,A_x_conj,A_y_conj,V,dt,dx,M)
+    complex(dp), intent(inout) :: A_x_d(:,:), A_y_d(:,:), A_u(:,:), A_x_conj(:,:,:), A_y_conj(:,:,:)
     real(dp), intent(in)       :: V(:,:), dt, dx
     integer, intent(in)        :: M
 
     integer :: i, j
 
     ! construct matrix operators
-    A_conj = (0._dp,0._dp)
+    A_x_conj = (0._dp,0._dp)
+    A_y_conj = (0._dp,0._dp)
 
     do i = 1,M
       do j = 1,M
-        A_conj(i,i,j) = cmplx(1._dp, 0.5_dp*dt*(-2._dp/(dx**2) - 0.5_dp*V(i,j)), dp)
-        A_d(i,j) = cmplx(1._dp, 0.5_dp*dt*(2._dp/(dx**2) + 0.5_dp*V(i,j)), dp)
+        A_x_conj(i,i,j) = cmplx(1._dp, -0.5_dp*dt*(2._dp/(dx**2) + 0.5_dp*V(i,j)), dp)
+        A_y_conj(i,i,j) = cmplx(1._dp, -0.5_dp*dt*(2._dp/(dx**2) + 0.5_dp*V(j,i)), dp)
+        A_x_d(i,j) = cmplx(1._dp, 0.5_dp*dt*(2._dp/(dx**2) + 0.5_dp*V(i,j)), dp)
+        A_y_d(i,j) = cmplx(1._dp, 0.5_dp*dt*(2._dp/(dx**2) + 0.5_dp*V(j,i)), dp)
 
         if (i>1) then
-          A_conj(i,i-1,j) = cmplx(0._dp, 0.5_dp*dt/(dx**2), dp)
+          A_x_conj(i,i-1,j) = cmplx(0._dp, 0.5_dp*dt/(dx**2), dp)
+          A_y_conj(i,i-1,j) = cmplx(0._dp, 0.5_dp*dt/(dx**2), dp)
         endif
 
         if (i<M) then
-          A_conj(i,i+1,j) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
+          A_x_conj(i,i+1,j) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
+          A_y_conj(i,i+1,j) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
           A_u(i,j) = cmplx(0._dp, -dt*0.5_dp/(dx**2), dp)
         endif
       enddo

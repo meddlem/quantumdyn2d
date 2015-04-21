@@ -32,8 +32,8 @@ contains
     
     ! create plot/animate instruction
     open(10,access = 'sequential', file = 'loop.plt')
-      write(10,*) 'splot "< cat plotfifo.dat" using 1:2:3 with lines,\' !with lines
-      write(10,*) '"" using 1:2:4 with lines' !with lines
+      write(10,*) 'splot "< cat plotfifo.dat" using 1:2:3 with lines' !with lines
+!      write(10,*) '"" using 1:2:4 with lines' !with lines
       write(10,*) 'pause 0.2'
       write(10,*) 'reread'
     close(10)

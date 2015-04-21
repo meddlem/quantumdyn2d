@@ -6,22 +6,21 @@ program main
   use io
   implicit none
 
-  complex(dp), allocatable :: psi(:), opm(:,:), opp_d(:), opp_u(:)
-  real(dp), allocatable    :: x(:), V(:)
-  real(dp) :: k, dx, dt, L
+  complex(dp), allocatable :: psi(:,:), A_conj(:,:), A_d(:), A_u(:)
+  real(dp), allocatable    :: x(:,:), y(:,:), V(:,:)
+  real(dp) :: k_x, k_y, dx, dt, L
   integer  :: M, n
 
-  call user_in(k,dx,dt,L,M,n)
-  allocate(psi(M),x(M),V(M),opm(M,M),opp_d(M),opp_u(M-1))
+  call user_in(k_x,k_y,dx,dt,L,M,n)
+  allocate(psi(M),x(M,M),y(M,M),V(M,M),A_conj(M,M),A_d(M),A_u(M-1))
   
-  call init_wavef(psi,x,dx,L,k,M)
-  call init_V(V,x,L)
-  call init_ops(opp_d,opp_u,opm,V,dt,dx,M)
+  call init_wavef(psi,x,y,dx,L,k_x,k_y,M)
+  call init_V(V,x,y,L)
+  call init_ops(A_d,A_u,A_conj,V,dt,dx,M)
   call animate_plot(L)
-  call line_plot(x,abs(psi)**2,'x','P','','',1)
 
-  call run_sim(psi,x,V,n,M,opp_d,opp_u,opm)
+  call run_sim(psi,x,y,V,n,M,A_d,A_u,A_conj)
   
   call close_plot()
-  deallocate(psi,x,V,opm,opp_d,opp_u)
+  deallocate(psi,x,y,V,opm,opp_d,opp_u)
 end program

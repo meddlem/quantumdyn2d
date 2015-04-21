@@ -5,8 +5,8 @@ module io
   public :: user_in
 contains
 
-  subroutine user_in(k,dx,dt,L,M,n)
-    real(dp), intent(out) :: k, dx, dt, L
+  subroutine user_in(k_x,k_y,dx,dt,L,M,n)
+    real(dp), intent(out) :: k_x, k_y, dx, dt, L
     integer, intent(out)  :: M, n
     
     ! set parameters
@@ -17,8 +17,10 @@ contains
     n = 5000
   
     write(*,'(/,A,/)') '************ Input *************' 
-    write(*,'(A)',advance='no') "k = " 
-    read(*,*) k
+    write(*,'(A)',advance='no') "k_x = " 
+    read(*,*) k_x
+    write(*,'(A)',advance='no') "k_y = " 
+    read(*,*) k_y
     write(*,'(A)') "Running simulation..."
   end subroutine
 

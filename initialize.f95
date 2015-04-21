@@ -68,25 +68,36 @@ contains
     A_y_conj = (0._dp,0._dp)
 
     do i = 1,M_x
-      do j = 1,M_x
+      do j = 1,M_y
         A_x_conj(i,i,j) = &
           cmplx(1._dp, -0.5_dp*dt*(2._dp/(dx**2) + 0.5_dp*V(i,j)), dp)
-        A_y_conj(i,i,j) = &
-          cmplx(1._dp, -0.5_dp*dt*(2._dp/(dx**2) + 0.5_dp*V(j,i)), dp)
         A_x_d(i,j) = &
           cmplx(1._dp, 0.5_dp*dt*(2._dp/(dx**2) + 0.5_dp*V(i,j)), dp)
-        A_y_d(i,j) = &
-          cmplx(1._dp, 0.5_dp*dt*(2._dp/(dx**2) + 0.5_dp*V(j,i)), dp)
 
         if (i>1) then
           A_x_conj(i,i-1,j) = cmplx(0._dp, 0.5_dp*dt/(dx**2), dp)
-          A_y_conj(i,i-1,j) = cmplx(0._dp, 0.5_dp*dt/(dx**2), dp)
         endif
 
         if (i<M_x) then
           A_x_conj(i,i+1,j) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
-          A_y_conj(i,i+1,j) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
           A_x_u(i,j) = cmplx(0._dp, -dt*0.5_dp/(dx**2), dp)
+        endif
+      enddo
+    enddo
+    
+    do i = 1,M_y
+      do j = 1,M_x
+        A_y_conj(i,i,j) = &
+          cmplx(1._dp, -0.5_dp*dt*(2._dp/(dx**2) + 0.5_dp*V(j,i)), dp)
+        A_y_d(i,j) = &
+          cmplx(1._dp, 0.5_dp*dt*(2._dp/(dx**2) + 0.5_dp*V(j,i)), dp)
+
+        if (i>1) then
+          A_y_conj(i,i-1,j) = cmplx(0._dp, 0.5_dp*dt/(dx**2), dp)
+        endif
+
+        if (i<M_y) then
+          A_y_conj(i,i+1,j) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
           A_y_u(i,j) = cmplx(0._dp, -dt*0.5_dp/(dx**2), dp)
         endif
       enddo

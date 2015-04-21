@@ -1,7 +1,7 @@
 FC = gfortran
 FFLAGS = -ffast-math -Wall -march=native -O3 -fopenmp #-fbounds-check#-Warray-temporaries #compiler flags
 LDFLAGS = -fopenmp #link flags
-LIBS = -llapack
+LIBS = -llapack -lblas
 
 COMPILE = $(FC) $(FFLAGS)
 LINK = $(FC) $(LDFLAGS)

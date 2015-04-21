@@ -15,7 +15,7 @@ program main
   call user_in(k_x,k_y,dx,dt,L_x,L_y,M_x,M_y,n)
 
   allocate(psi(M_x,M_y), x(M_x,M_y), y(M_x,M_y), V(M_x,M_y),&
-    A_x_conj(M_x,M_x,M_y), A_y_conj(M_y,M_y,M_x), A_x_d(M_x,M_y),&
+    A_x_conj(3,M_x,M_y), A_y_conj(3,M_y,M_x), A_x_d(M_x,M_y),&
     A_y_d(M_y,M_x), A_x_u(M_x-1,M_y), A_y_u(M_y-1,M_x))
   
   ! initialize simulation

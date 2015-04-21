@@ -88,32 +88,32 @@ contains
       enddo
     enddo
 
-    ! construct conjugate matrix ops
+    ! construct conjugate matrix ops, band storage fmt
 
     do i = 1,M_x
       do j = 1,M_y
-        A_x_conj(i,i,j) = conjg(A_x_d(i,j))
+        A_x_conj(2,i,j) = conjg(A_x_d(i,j))
         
         if (i>1) then
-          A_x_conj(i,i-1,j) = conjg(A_x_u(i-1,j))
+          A_x_conj(1,i-1,j) = conjg(A_x_u(i-1,j))
         endif
         
         if (i<M_x) then
-          A_x_conj(i,i+1,j) = conjg(A_x_u(i,j))
+          A_x_conj(3,i+1,j) = conjg(A_x_u(i,j))
         endif
       enddo
     enddo
     
     do i = 1,M_y
       do j = 1,M_x
-        A_y_conj(i,i,j) = conjg(A_y_d(i,j))
+        A_y_conj(2,i,j) = conjg(A_y_d(i,j))
         
         if (i>1) then
-          A_y_conj(i,i-1,j) = conjg(A_y_u(i-1,j))
+          A_y_conj(1,i-1,j) = conjg(A_y_u(i-1,j))
         endif
         
         if (i<M_y) then
-          A_y_conj(i,i+1,j) = conjg(A_y_u(i,j))
+          A_y_conj(3,i+1,j) = conjg(A_y_u(i,j))
         endif
       enddo
     enddo

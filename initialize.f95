@@ -33,11 +33,11 @@ contains
     real(dp), intent(inout) :: V(:)
     
     ! block/scattering potential
-    V = 0._dp
-    where(28._dp<x .and. x<32._dp) V = 1._dp
+    !V = 0._dp
+    !where(28._dp<x .and. x<32._dp) V = 1._dp
     
     ! harmonic potential
-    ! V = 1._dp/4*(x-L/2)**2
+    V = 1._dp*(x-L/2)**2
   end subroutine
     
   subroutine init_ops(opp_d,opp_u,opm,V,dt,dx,M)
@@ -51,16 +51,16 @@ contains
     opm = (0._dp,0._dp)
 
     do i = 1,M
-      opm(i,i) = cmplx(1._dp, (-dt*2._dp/(dx**2) - V(i))/2._dp, dp)
-      opp_d(i) = cmplx(1._dp, (dt*2._dp/(dx**2) + V(i))/2._dp, dp)
+      opm(i,i) = cmplx(1._dp, 0.5_dp*dt*(-2._dp/(dx**2) - V(i)), dp)
+      opp_d(i) = cmplx(1._dp, 0.5_dp*dt*(2._dp/(dx**2) + V(i)), dp)
 
       if (i>1) then
-        opm(i,i-1) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
+        opm(i,i-1) = cmplx(0._dp, 0.5_dp*dt/(dx**2), dp)
       endif
 
       if (i<M) then
-        opm(i,i+1) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
-        opp_u(i) = cmplx(0._dp, -dt*0.5_dp/(dx**2), dp)
+        opm(i,i+1) = cmplx(0._dp, 0.5_dp*dt/(dx**2), dp)
+        opp_u(i) = cmplx(0._dp, -0.5_dp*dt/(dx**2), dp)
       endif
     enddo
   end subroutine

@@ -10,9 +10,9 @@ contains
     integer, intent(out)  :: M, n
     
     ! set parameters
-    dx = 0.05_dp
-    dt = 0.025_dp
-    L = 6._dp
+    dx = 0.1_dp
+    dt = 0.1_dp
+    L = 15._dp
     M = floor(L/dx)
     n = 500
   

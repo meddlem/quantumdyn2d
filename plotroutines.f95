@@ -17,18 +17,23 @@ contains
       write(10,*) 'set term x11' 
       write(10,*) 'set style line 1 lt 1 lc rgb "blue" lw 2 pt 2 ps 0.6'
       write(10,*) 'set grid'
+      !write(10,*) 'set palette grey'
+      !write(10,*) 'set view map'
+      !write(10,*) 'set dgrid3d'
+      !write(10,*) 'set pm3d interpolate 10,10'
       write(10,*) 'set hidden3d'
       !write(10,*) 'set xlabel "x"'
       !write(10,*) 'set ylabel "Psi^2"'
-      !write(10,*) 'set xrange [0:',L,']'
-      !write(10,*) 'set yrange [-1.1:1.1]'
+      write(10,*) 'set xrange [0:',L,']'
+      write(10,*) 'set yrange [0:',L,']'
+      !write(10,*) 'set zrange [0:0.2]'
       write(10,*) 'load "loop.plt"'
     close(10)
     
     ! create plot/animate instruction
     open(10,access = 'sequential', file = 'loop.plt')
-      write(10,*) 'splot "< cat plotfifo.dat" using 1:2:3 with lines ls 1 title "|Psi|^2"'
-      write(10,*) 'pause 0.01'
+      write(10,*) 'splot "< cat plotfifo.dat" using 1:2:3 with lines' !with lines
+      write(10,*) 'pause 0.2'
       write(10,*) 'reread'
     close(10)
     

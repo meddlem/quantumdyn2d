@@ -6,13 +6,13 @@ program main
   use io
   implicit none
 
-  complex(dp), allocatable :: psi(:,:), A_conj(:,:), A_d(:), A_u(:)
+  complex(dp), allocatable :: psi(:,:), A_conj(:,:,:), A_d(:,:), A_u(:,:)
   real(dp), allocatable    :: x(:,:), y(:,:), V(:,:)
   real(dp) :: k_x, k_y, dx, dt, L
   integer  :: M, n
 
   call user_in(k_x,k_y,dx,dt,L,M,n)
-  allocate(psi(M,M),x(M,M),y(M,M),V(M,M),A_conj(M,M),A_d(M),A_u(M-1))
+  allocate(psi(M,M),x(M,M),y(M,M),V(M,M),A_conj(M,M,M),A_d(M,M),A_u(M-1,M))
   
   call init_wavef(psi,x,y,dx,L,k_x,k_y,M)
   call init_V(V,x,y,L)

@@ -8,7 +8,7 @@ module evolve
 contains
   subroutine run_sim(psi, x, y, V, n, M, A_d, A_u, A_conj)
     complex(dp), intent(inout) :: psi(:,:)
-    complex(dp), intent(in)    :: A_d(:), A_u(:), A_conj(:,:)
+    complex(dp), intent(in)    :: A_d(:,:), A_u(:,:), A_conj(:,:,:)
     real(dp), intent(in)       :: x(:,:), y(:,:), V(:,:)
     integer, intent(in)        :: n, M
 
@@ -16,13 +16,16 @@ contains
 
     do i=1,n
       call inc_time(psi, M, A_d, A_u, A_conj)
-      call plot_wavef(psi, x, y, V, M)
+      
+      if (mod(i,10)==0) then
+        call plot_wavef(psi, x, y, V, M)
+      endif
     enddo
   end subroutine
 
   subroutine inc_time(psi, M, A_d, A_u, A_conj)
     complex(dp), intent(inout) :: psi(:,:)
-    complex(dp), intent(in)    :: A_d(:), A_u(:), A_conj(:,:)
+    complex(dp), intent(in)    :: A_d(:,:), A_u(:,:), A_conj(:,:,:)
     integer, intent(in) :: M
 
     complex(dp), allocatable :: r(:), A_d_tmp(:), A_l_tmp(:), A_u_tmp(:)
@@ -35,16 +38,12 @@ contains
     ! horizontal sweep
     do i=1,M
       ! define needed temp arrays
-      A_d_tmp = A_d
-      A_u_tmp = A_u
-      A_l_tmp = A_u
+      A_d_tmp = A_d(:,i)
+      A_u_tmp = A_u(:,i)
+      A_l_tmp = A_u(:,i)
 
       ! explicit part of calculation
-      r = matmul(A_conj,psi(:,i))
-
-      ! enforce fixed bcs
-      r(1) = (0._dp,0._dp)
-      r(M) = (0._dp,0._dp)
+      r = matmul(A_conj(:,:,i),psi(:,i))
 
       ! solve for psi at t=n+1/2
       call zgtsv(M,1,A_l_tmp,A_d_tmp,A_u_tmp,r,M,info)
@@ -54,16 +53,12 @@ contains
     ! vertical sweep
     do i=1,M
       ! define needed temp arrays
-      A_d_tmp = A_d
-      A_u_tmp = A_u
-      A_l_tmp = A_u
+      A_d_tmp = A_d(:,i)
+      A_u_tmp = A_u(:,i)
+      A_l_tmp = A_u(:,i)
 
       ! explicit part of calculation
-      r = matmul(A_conj,psi(i,:))
-
-      ! enforce fixed bcs
-      r(1) = (0._dp,0._dp)
-      r(M) = (0._dp,0._dp)
+      r = matmul(A_conj(:,:,i),psi(i,:))
 
       ! solve for psi at t=n+1/2
       call zgtsv(M,1,A_l_tmp,A_d_tmp,A_u_tmp,r,M,info)

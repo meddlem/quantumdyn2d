@@ -6,35 +6,35 @@ module initialize
 
 contains
   
-  subroutine init_wavef(psi,x,dx,L,k,M)
-    complex(dp), intent(inout) :: psi(:) 
-    real(dp), intent(inout)    :: x(:)
+  subroutine init_wavef(psi,x,y,dx,L,k,M)
+    complex(dp), intent(inout) :: psi(:,:) 
+    real(dp), intent(inout)    :: x(:,:), y(:,:)
     real(dp), intent(in)       :: dx, L, k
     integer, intent(in)        :: M
-    integer :: i
+    integer :: i, j
     
+    ! create grid
     do i = 1,M
-      x(i) = i*dx
+      do j = 1,M
+        x(i,j) = i*dx
+        y(i,j) = j*dx
+      enddo
     enddo
 
-    ! isq well
-    ! psi_0 = sin(2*pi*x/L)*exp(cmplx(0._dp,k*x,dp))
-    
     ! gaussian wavepackets
-    psi = exp(-0.5_dp*(x-L/2)**2)*exp(cmplx(0._dp,k*x,dp)) !+ &
- !     exp(-0.5_dp*(x-2*L/3)**2)*exp(cmplx(0._dp,-k*x,dp))
+    psi = exp(-0.5_dp*((x-L/2)**2 + (y-L/2)**2))*exp(cmplx(0._dp,k_x*x+k_y*y,dp)) 
 
     ! normalize wavefunction
-    psi = psi/sqrt(sum(abs(psi)**2*dx))
+    psi = psi/sqrt(sum(abs(psi)**2*dx**2))
   end subroutine
 
-  subroutine init_V(V,x,L)
-    real(dp), intent(in) :: x(:), L
-    real(dp), intent(inout) :: V(:)
+  subroutine init_V(V,x,y,L)
+    real(dp), intent(in) :: x(:,:), y(:,:), L
+    real(dp), intent(inout) :: V(:,:)
     
     ! block/scattering potential
     V = 0._dp
-    where(28._dp<x .and. x<32._dp) V = 1._dp
+    !where(28._dp<x .and. x<32._dp) V = 1._dp
     
     ! harmonic potential
     ! V = 1._dp/4*(x-L/2)**2
@@ -47,21 +47,24 @@ contains
 
     integer :: i
 
-    ! construct matrix operators 
-    opm = (0._dp,0._dp)
+    ! construct matrix operators, x-dir
+    A_c = (0._dp,0._dp)
 
     do i = 1,M
-      opm(i,i) = cmplx(1._dp, (-dt*2._dp/(dx**2) - V(i))/2._dp, dp)
-      opp_d(i) = cmplx(1._dp, (dt*2._dp/(dx**2) + V(i))/2._dp, dp)
+      A_c(i,i) = cmplx(1._dp, 0.5_dp*dt*(-2._dp/(dx**2) - 0.5_dp*V(i,j)), dp)
+      A_d(i) = cmplx(1._dp, 0.5_dp*dt*(2._dp/(dx**2) + V(i)), dp)
 
       if (i>1) then
-        opm(i,i-1) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
+        A_c(i,i-1) = cmplx(0._dp, 0.5_dp*dt/(dx**2), dp)
       endif
 
       if (i<M) then
-        opm(i,i+1) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
-        opp_u(i) = cmplx(0._dp, -dt*0.5_dp/(dx**2), dp)
+        A_c(i,i+1) = cmplx(0._dp, dt*0.5_dp/(dx**2), dp)
+        A_u(i) = cmplx(0._dp, -dt*0.5_dp/(dx**2), dp)
       endif
     enddo
+    ! y dir
+    B_c = (0._dp,0._dp)
+
   end subroutine
 end module 

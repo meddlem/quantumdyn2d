@@ -14,7 +14,7 @@ contains
     dt = 0.1_dp
     L = 15._dp
     M = floor(L/dx)
-    n = 500
+    n = 5000
   
     write(*,'(/,A,/)') '************ Input *************' 
     write(*,'(A)',advance='no') "k_x = " 

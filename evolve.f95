@@ -48,6 +48,6 @@ contains
     ! collect new psi 
     psi = r
 
-    deallocate(opp_d_tmp,opp_u_tmp,r)
+    deallocate(opp_d_tmp,opp_l_tmp,opp_u_tmp,r)
   end subroutine
 end module

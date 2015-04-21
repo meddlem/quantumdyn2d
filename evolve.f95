@@ -44,7 +44,7 @@ contains
     ! modify lapack routine, so temp arrays are not needed? 
 
     ! horizontal sweep
-    !#$omp parallel do private(A_d_tmp,A_u_tmp,A_l_tmp,g)
+    !$omp parallel do private(A_x_d_tmp,A_x_u_tmp,A_x_l_tmp,g_x)
     do i=1,M_y
       ! define needed temp arrays
       A_x_d_tmp = A_x_d(:,i)
@@ -58,10 +58,10 @@ contains
       call zgtsv(M_x,1,A_x_l_tmp,A_x_d_tmp,A_x_u_tmp,g_x,M_x,info)
       psi(:,i) = g_x
     enddo
-    !#$omp end parallel do
+    !$omp end parallel do
 
     ! vertical sweep
-    !#$omp parallel do private(A_d_tmp,A_u_tmp,A_l_tmp,g)
+    !$omp parallel do private(A_y_d_tmp,A_y_u_tmp,A_y_l_tmp,g_y)
     do i=1,M_x
       ! define needed temp arrays
       A_y_d_tmp = A_y_d(:,i)
@@ -75,7 +75,7 @@ contains
       call zgtsv(M_y,1,A_y_l_tmp,A_y_d_tmp,A_y_u_tmp,g_y,M_y,info)
       psi(i,:) = g_y
     enddo
-    !#$omp end parallel do
+    !$omp end parallel do
 
     !deallocate(A_d_tmp,A_l_tmp,A_u_tmp,g)
   end subroutine

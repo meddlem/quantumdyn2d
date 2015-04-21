@@ -12,7 +12,7 @@ contains
     ! set parameters
     dx = 0.15_dp
     dt = 0.1_dp
-    L_x = 15._dp
+    L_x = 20._dp
     L_y = 15._dp
     M_x = floor(L_x/dx)
     M_y = floor(L_y/dx)

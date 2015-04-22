@@ -13,7 +13,7 @@ program main
 
   call user_in(k_x,k_y,dx,dt,L_x,L_y,M_x,M_y,n)
 
-  allocate(psi(M_x,M_y), x(M_x,M_y), y(M_x,M_y), V(M_x,M_y),A_x(3,M_x,M_y), &
+  allocate(psi(M_x,M_y), x(M_x,M_y), y(M_x,M_y), V(M_x,M_y), A_x(3,M_x,M_y), &
     A_y(3,M_y,M_x))
   
   ! initialize simulation

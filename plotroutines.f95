@@ -15,12 +15,13 @@ contains
     ! create a gnuplot command file
     open(10,access = 'sequential',file = 'matplot.plt')
       write(10,*) 'set term x11' 
-      write(10,*) 'set style line 1 lt 1 lc rgb "blue" lw 2 pt 2 ps 0.6'
-      write(10,*) 'set grid'
-      !write(10,*) 'set palette grey'
+      !write(10,*) 'set style line 1 lt 1 lc rgb "blue" lw 2 pt 2 ps 0.6'
+      write(10,*) 'set grid back'
+      !write(10,*) 'set palette defined ( 0 "#000090", 1 "#000fff",\' 
+      !write(10,*) '2 "#0090ff", 3 "#0fffee", 4 "#90ff70", 5 "#ffee00",\' 
+      !write(10,*) '6 "#ff7000", 7 "#ee0000", 8 "#7f0000")'
       !write(10,*) 'set view map'
-      !write(10,*) 'set dgrid3d'
-      !write(10,*) 'set pm3d interpolate 10,10'
+      !write(10,*) 'set pm3d'
       write(10,*) 'set hidden3d'
       write(10,*) 'set xlabel "x"'
       write(10,*) 'set ylabel "y"'
@@ -32,7 +33,7 @@ contains
     
     ! create plot/animate instruction
     open(10,access = 'sequential', file = 'loop.plt')
-      write(10,*) 'splot "< cat plotfifo.dat" using 1:2:3 with lines' !with lines
+      write(10,*) 'splot "< cat plotfifo.dat" using 1:2:3 with lines linecolor rgb "blue"' !with pm3d
 !      write(10,*) '"" using 1:2:4 with lines' !with lines
       write(10,*) 'pause 0.2'
       write(10,*) 'reread'
@@ -50,13 +51,14 @@ contains
     integer :: i, j
     character(50) :: rfmt
 
-    rfmt = '(F10.5,5X,F10.5,5X,F10.5)' 
+    rfmt = '(F10.5,1X,F10.5,1X,F10.5)' 
     
     open(11,access = 'sequential',status = 'replace',file = 'plotfifo.dat')
       do i = 1,M_x
         do j = 1,M_y
           write(11,rfmt) x(i,j), y(i,j), abs(psi(i,j))**2 ! write plot data to pipe 
         enddo
+        write(11,*) '' ! add space between different xvals, needed for gnuplot
       enddo
     close(11)
   end subroutine

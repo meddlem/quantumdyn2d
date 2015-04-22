@@ -18,9 +18,7 @@ contains
     do i=1,n
       call inc_time(psi, M_x, M_y, A_x, A_y)
       
-      if (mod(i,30)==0) then
-        call plot_wavef(psi, x, y, M_x, M_y)
-      endif
+      if (mod(i,30)==0) call plot_wavef(psi, x, y, M_x, M_y)
     enddo
   end subroutine
 
@@ -32,25 +30,21 @@ contains
     complex(dp), allocatable :: g_x(:), g_y(:), A_x_d_tmp(:), A_x_l_tmp(:), &
                                 A_x_u_tmp(:), A_y_d_tmp(:), A_y_l_tmp(:), &
                                 A_y_u_tmp(:)
-    complex(dp), save        :: one, zero
     integer                  :: i, info
 
     allocate(A_x_d_tmp(M_x), A_x_l_tmp(M_x-1), A_x_u_tmp(M_x-1), g_x(M_x), &
       A_y_d_tmp(M_y), A_y_l_tmp(M_y-1), A_y_u_tmp(M_y-1), g_y(M_y))
 
-    ! init
-    one = (1._dp,0._dp)
-    zero = (0._dp,0._dp)
-    
     ! horizontal sweep
     !$omp parallel do private(A_x_d_tmp,A_x_u_tmp,A_x_l_tmp,g_x)
     do i=1,M_y
-      ! define needed temp arrays
+      ! init temp arrays
+      g_x = A_x(2,:,i)
       A_x_d_tmp = A_x(2,:,i)
       A_x_u_tmp = A_x(1,1:M_x-1,i)
       A_x_l_tmp = A_x(1,1:M_x-1,i)
 
-      ! explicit part of calculation
+      ! explicit part of calculation, mat-vec multiplication
       call zgbmv('N',M_x,M_x,1,1,one,conjg(A_x(:,:,i)),3,psi(:,i),1,zero,g_x,1)
 
       ! solve for psi at t=n+1/2
@@ -62,12 +56,13 @@ contains
     ! vertical sweep
     !$omp parallel do private(A_y_d_tmp,A_y_u_tmp,A_y_l_tmp,g_y)
     do i=1,M_x
-      ! define needed temp arrays
+      ! init temp arrays
+      g_y = A_y(2,:,i)
       A_y_d_tmp = A_y(2,:,i)
       A_y_u_tmp = A_y(1,1:M_y-1,i)
       A_y_l_tmp = A_y(1,1:M_y-1,i)
 
-      ! explicit part of calculation
+      ! explicit part of calculation, mat-vec multiplication
       call zgbmv('N',M_y,M_y,1,1,one,conjg(A_y(:,:,i)),3,psi(i,:),1,zero,g_y,1)
 
       ! solve for psi at t=n+1

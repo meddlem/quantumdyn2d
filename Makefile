@@ -14,7 +14,7 @@ OBJS += constants.o
 OBJS += io.o
 OBJS += plotroutines.o
 OBJS += initialize.o
-OBJS += evolve.o
+OBJS += simulation.o
 OBJS += main.o
 
 all: $(PROG)

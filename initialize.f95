@@ -47,7 +47,7 @@ contains
 
     integer :: i
 
-    ! construct matrix operators, band storage fmt
+    ! construct matrix operators in band storage fmt
     do i = 1,M
       A_x(1,i) = cmplx(0._dp, -0.5_dp*dt/dx**2, dp)
       A_x(2,i) = cmplx(1._dp, 0.5_dp*dt*(2._dp/dx**2 + V(i)), dp)

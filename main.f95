@@ -1,7 +1,7 @@
 program main
   use constants
   use initialize
-  use evolve
+  use simulation
   use plotroutines
   use io
   implicit none

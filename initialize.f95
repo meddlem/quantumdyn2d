@@ -15,7 +15,7 @@ contains
     real(dp), allocatable :: r(:,:), H_xy(:,:)
     integer               :: i, j
 
-    allocate(r(M_x,M_y),H_xy(M_x,M_y))
+    allocate(r(M_x,M_y), H_xy(M_x,M_y))
     
     ! create grid
     do i = 1,M_x
@@ -26,20 +26,20 @@ contains
     enddo
     
     ! distance to grid center
-    r = sqrt((x-L_x/2)**2 + (y-L_y/2)**2) 
+    r = sqrt((x - L_x/2)**2 + (y - L_y/2)**2) 
 
     ! ISQW wavefunction
     !psi = cmplx(sin(3*pi*x/L)*sin(2*pi*y/L),0._dp,dp) * &
     !  exp(cmplx(0._dp,k_x*x+k_y*y,dp))
 
     ! gaussian wavepackets
-    H_xy = (x-L_x/2)*(y-L_y/2)**1
-    psi = H_xy*exp(-0.5_dp*r**2)*exp(cmplx(0._dp,k_x*x+k_y*y,dp))
+    H_xy = (x - L_x/2)*(y - L_y/2)**1
+    psi = H_xy*exp(-0.5_dp*r**2)*exp(cmplx(0._dp,k_x*x + k_y*y,dp))
 
     ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*dx**2))
 
-    deallocate(r)
+    deallocate(r, H_xy)
   end subroutine
 
   subroutine init_V(V, x, y, L_x, L_y)
@@ -61,7 +61,7 @@ contains
 
     integer :: i, j
 
-    ! construct matrix operators, x-dir, band storage fmt
+    ! construct ADI matrix operators, x-dir, band storage fmt
     do i = 1,M_x
       do j = 1,M_y
         A_x(1,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
@@ -70,7 +70,7 @@ contains
       enddo
     enddo
     
-    ! construct matrix operators, y-dir, band storage fmt
+    ! construct ADI matrix operators, y-dir, band storage fmt
     do i = 1,M_y
       do j = 1,M_x
         A_y(1,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)

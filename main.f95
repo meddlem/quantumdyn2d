@@ -6,22 +6,21 @@ program main
   use io
   implicit none
 
-  complex(dp), allocatable :: psi(:), opm(:,:), opp_d(:), opp_u(:)
+  complex(dp), allocatable :: psi(:), A_x(:,:)
   real(dp), allocatable    :: x(:), V(:)
   real(dp) :: k, dx, dt, L
   integer  :: M, n
 
   call user_in(k,dx,dt,L,M,n)
-  allocate(psi(M),x(M),V(M),opm(M,M),opp_d(M),opp_u(M-1))
+  allocate(psi(M),x(M),V(M),A_x(3,M))
   
   call init_wavef(psi,x,dx,L,k,M)
   call init_V(V,x,L)
-  call init_ops(opp_d,opp_u,opm,V,dt,dx,M)
+  call init_ops(A_x,V,dt,dx,M)
   call animate_plot(L)
-  call line_plot(x,abs(psi)**2,'x','P','','',1)
 
-  call run_sim(psi,x,V,n,M,opp_d,opp_u,opm)
+  call run_sim(psi,x,V,n,M,A_x)
   
   call close_plot()
-  deallocate(psi,x,V,opm,opp_d,opp_u)
+  deallocate(psi,x,V,A_x)
 end program

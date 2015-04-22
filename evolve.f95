@@ -6,48 +6,44 @@ module evolve
   public :: run_sim
 
 contains
-  subroutine run_sim(psi, x, V, n, M, opp_d, opp_u, opm)
+  subroutine run_sim(psi, x, V, n, M, A_x)
     complex(dp), intent(inout) :: psi(:)
-    complex(dp), intent(in)    :: opp_d(:), opp_u(:), opm(:,:)
+    complex(dp), intent(in)    :: A_x(:,:)
     real(dp), intent(in)       :: x(:), V(:)
     integer, intent(in)        :: n, M
 
     integer :: i
 
     do i=1,n
-      call inc_time(psi, M, opp_d, opp_u, opm)
+      call inc_time(psi, M, A_x)
       call plot_wavef(psi, x, V, M)
     enddo
   end subroutine
 
-  subroutine inc_time(psi, M, opp_d, opp_u, opm)
+  subroutine inc_time(psi, M, A_x)
     complex(dp), intent(inout) :: psi(:)
-    complex(dp), intent(in)    :: opp_d(:), opp_u(:), opm(:,:)
-    integer, intent(in) :: M
+    complex(dp), intent(in)    :: A_x(:,:)
+    integer, intent(in)        :: M
 
-    complex(dp), allocatable :: r(:), opp_d_tmp(:), opp_l_tmp(:), opp_u_tmp(:)
+    complex(dp), allocatable :: g(:), A_x_d_tmp(:), A_x_l_tmp(:), A_x_u_tmp(:)
     integer ::  info
 
-    allocate(opp_d_tmp(M),opp_l_tmp(M-1),opp_u_tmp(M-1),r(M))
+    allocate(A_x_d_tmp(M),A_x_l_tmp(M-1),A_x_u_tmp(M-1),g(M))
     
-    ! define temp arrays
-    opp_d_tmp = opp_d
-    opp_u_tmp = opp_u
-    opp_l_tmp = opp_u
+    ! init temp arrays
+    A_x_l_tmp = A_x(1,1:M-1)
+    A_x_d_tmp = A_x(2,:)
+    A_x_u_tmp = A_x(1,1:M-1)
     
-    ! explicit part of calculation
-    r = matmul(opm,psi)
+    ! explicit part of calculation, mat-vec multiplication
+    call zgbmv('N',M,M,1,1,one,conjg(A_x),3,psi,1,zero,g,1)
 
-    ! enforce fixed bcs
-    r(1) = (0._dp,0._dp)
-    r(M) = (0._dp,0._dp)
+    ! solve for psi at t=n+1
+    call zgtsv(M,1,A_x_l_tmp,A_x_d_tmp,A_x_u_tmp,g,M,info)
 
-    ! solve for psi at next timestep
-    call zgtsv(M,1,opp_l_tmp,opp_d_tmp,opp_u_tmp,r,M,info)
+    ! collect psi at t=n+1
+    psi = g
 
-    ! collect new psi 
-    psi = r
-
-    deallocate(opp_d_tmp,opp_l_tmp,opp_u_tmp,r)
+    deallocate(A_x_d_tmp,A_x_l_tmp,A_x_u_tmp,g)
   end subroutine
 end module

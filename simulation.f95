@@ -16,7 +16,7 @@ contains
 
     do i=1,n
       call solve_nxt(psi, M, A_x)
-      call plot_wavef(psi, x, V, M)
+      if(mod(i,10)==0) call plot_wavef(psi, x, V, M)
     enddo
   end subroutine
 

@@ -17,11 +17,11 @@ contains
       write(10,*) 'set term x11' 
       !write(10,*) 'set style line 1 lt 1 lc rgb "blue" lw 2 pt 2 ps 0.6'
       write(10,*) 'set grid back'
-      !write(10,*) 'set palette defined ( 0 "#000090", 1 "#000fff",\' 
-      !write(10,*) '2 "#0090ff", 3 "#0fffee", 4 "#90ff70", 5 "#ffee00",\' 
-      !write(10,*) '6 "#ff7000", 7 "#ee0000", 8 "#7f0000")'
-      !write(10,*) 'set view map'
-      !write(10,*) 'set pm3d'
+      write(10,*) 'set palette defined ( 0 "#000090", 1 "#000fff",\' 
+      write(10,*) '2 "#0090ff", 3 "#0fffee", 4 "#90ff70", 5 "#ffee00",\' 
+      write(10,*) '6 "#ff7000", 7 "#ee0000", 8 "#7f0000")'
+      write(10,*) 'set view map'
+      write(10,*) 'set pm3d'
       write(10,*) 'set hidden3d'
       write(10,*) 'set xlabel "x"'
       write(10,*) 'set ylabel "y"'
@@ -33,7 +33,7 @@ contains
     
     ! create plot/animate instruction
     open(10,access = 'sequential', file = 'loop.plt')
-      write(10,*) 'splot "< cat plotfifo.dat" using 1:2:3 with lines linecolor rgb "blue"' !with pm3d
+      write(10,*) 'splot "< cat plotfifo.dat" using 1:2:3 with pm3d'! lines linecolor rgb "blue"' !with pm3d
 !      write(10,*) '"" using 1:2:4 with lines' !with lines
       write(10,*) 'pause 0.2'
       write(10,*) 'reread'

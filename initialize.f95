@@ -10,9 +10,9 @@ contains
     integer, intent(out)  :: Mx, My, n
     
     ! model parameters
-    dx = 0.1_dp
-    dt = 0.1_dp
-    Lx = 20._dp
+    dx = 0.05_dp
+    dt = 0.01_dp
+    Lx = 30._dp
     Ly = 10._dp
     Mx = floor(Lx/dx)
     My = floor(Ly/dx)
@@ -39,7 +39,7 @@ contains
     enddo
     
     ! starting position for wavepacket
-    r = sqrt((x - Lx/2)**2 + (y - Ly/2)**2) 
+    r = sqrt((x - Lx/4)**2 + (y - Ly/2)**2) 
 
     ! ISQW wavefunction
     !psi = cmplx(sin(3*pi*x/L)*sin(2*pi*y/L),0._dp,dp) * &
@@ -61,7 +61,7 @@ contains
     
     ! scattering potential
     V = 80._dp
-    where(Ly/3<y .and. y<Ly*2/3) V = 0._dp
+    where(Ly*0.4_dp<y .and. y<Ly*0.6_dp) V = 0._dp
     where(x>Lx/2) V = 0._dp
     
     ! harmonic potential

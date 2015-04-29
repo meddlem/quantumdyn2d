@@ -5,8 +5,8 @@ module plotroutines
   public :: line_plot, plot_wavef, close_plot, animate_plot
 
 contains
-  subroutine animate_plot(L_x,L_y)
-    real(dp), intent(in) :: L_x, L_y
+  subroutine animate_plot(Lx,Ly)
+    real(dp), intent(in) :: Lx, Ly
     integer :: ret
     
     ! creates fifo pipe: plotfifo.dat
@@ -17,17 +17,17 @@ contains
       write(10,*) 'set term x11' 
       !write(10,*) 'set style line 1 lt 1 lc rgb "blue" lw 2 pt 2 ps 0.6'
       write(10,*) 'set grid back'
-      write(10,*) 'set palette grey'
-     ! write(10,*) 'set palette defined ( 0 "#000090", 1 "#000fff",\' 
-      !write(10,*) '2 "#0090ff", 3 "#0fffee", 4 "#90ff70", 5 "#ffee00",\' 
-      !write(10,*) '6 "#ff7000", 7 "#ee0000", 8 "#7f0000")'
+      !write(10,*) 'set palette grey'
+      write(10,*) 'set palette defined ( 0 "#000090", 1 "#000fff",\' 
+      write(10,*) '2 "#0090ff", 3 "#0fffee", 4 "#90ff70", 5 "#ffee00",\' 
+      write(10,*) '6 "#ff7000", 7 "#ee0000", 8 "#7f0000")'
       write(10,*) 'set view map'
       write(10,*) 'set pm3d'
       write(10,*) 'set hidden3d'
       write(10,*) 'set xlabel "x"'
       write(10,*) 'set ylabel "y"'
-      write(10,*) 'set xrange [0:',L_x,']'
-      write(10,*) 'set yrange [0:',L_y,']'
+      write(10,*) 'set xrange [0:',Lx,']'
+      write(10,*) 'set yrange [0:',Ly,']'
       !write(10,*) 'set zrange [0:0.2]'
       write(10,*) 'load "loop.plt"'
     close(10)
@@ -44,10 +44,10 @@ contains
     call system("gnuplot matplot.plt &",ret)
   end subroutine
   
-  subroutine plot_wavef(psi, x, y, M_x, M_y)
+  subroutine plot_wavef(psi, x, y, Mx, My)
     complex(dp), intent(in) :: psi(:,:)
     real(dp), intent(in)    :: x(:,:), y(:,:)
-    integer, intent(in)     :: M_x, M_y
+    integer, intent(in)     :: Mx, My
 
     integer :: i, j
     character(50) :: rfmt
@@ -55,8 +55,8 @@ contains
     rfmt = '(F10.5,1X,F10.5,1X,F10.5)' 
     
     open(11,access = 'sequential',status = 'replace',file = 'plotfifo.dat')
-      do i = 1,M_x
-        do j = 1,M_y
+      do i = 1,Mx
+        do j = 1,My
           write(11,rfmt) x(i,j), y(i,j), abs(psi(i,j))**2 ! write plot data to pipe 
         enddo
         write(11,*) '' ! add space between different xvals, needed for gnuplot

@@ -7,72 +7,72 @@ module simulation
   public :: run_sim
 
 contains
-  subroutine run_sim(psi, x, y, n, M_x, M_y, A_x, A_y)
+  subroutine run_sim(psi, x, y, n, Mx, My, Ax, Ay)
     complex(dp), intent(inout) :: psi(:,:)
-    complex(dp), intent(in)    :: A_x(:,:,:), A_y(:,:,:)
+    complex(dp), intent(in)    :: Ax(:,:,:), Ay(:,:,:)
     real(dp), intent(in)       :: x(:,:), y(:,:)
-    integer, intent(in)        :: n, M_x, M_y
+    integer, intent(in)        :: n, Mx, My
 
     integer :: i
 
     do i=1,n
-      call solve_nxt(psi, M_x, M_y, A_x, A_y)
+      call solve_nxt(psi, Mx, My, Ax, Ay)
       
-      if (mod(i,100)==0) call plot_wavef(psi, x, y, M_x, M_y)
+      if (mod(i,100)==0) call plot_wavef(psi, x, y, Mx, My)
     enddo
   end subroutine
 
-  subroutine solve_nxt(psi, M_x, M_y, A_x, A_y)
+  subroutine solve_nxt(psi, Mx, My, Ax, Ay)
     complex(dp), intent(inout) :: psi(:,:)
-    complex(dp), intent(in)    :: A_x(:,:,:), A_y(:,:,:)
-    integer, intent(in)        :: M_x, M_y
+    complex(dp), intent(in)    :: Ax(:,:,:), Ay(:,:,:)
+    integer, intent(in)        :: Mx, My
 
-    complex(dp), allocatable :: g_x(:), g_y(:), A_x_d(:), A_x_l(:), &
-                                A_x_u(:), A_y_d(:), A_y_l(:), &
-                                A_y_u(:)
+    complex(dp), allocatable :: gx(:), gy(:), Ax_d(:), Ax_l(:), &
+                                Ax_u(:), Ay_d(:), Ay_l(:), &
+                                Ay_u(:)
     integer                  :: i, info
 
-    allocate(A_x_d(M_x), A_x_l(M_x-1), A_x_u(M_x-1), g_x(M_x), A_y_d(M_y), &
-      A_y_l(M_y-1), A_y_u(M_y-1), g_y(M_y))
+    allocate(Ax_d(Mx), Ax_l(Mx-1), Ax_u(Mx-1), gx(Mx), Ay_d(My), &
+      Ay_l(My-1), Ay_u(My-1), gy(My))
 
     ! horizontal sweep
-    !$omp parallel do private(A_x_d,A_x_u,A_x_l,g_x)
-    do i=1,M_y
+    !$omp parallel do private(Ax_d,Ax_u,Ax_l,gx)
+    do i=1,My
       ! init temp arrays
-      g_x = A_x(2,:,i)
-      A_x_d = A_x(2,:,i)
-      A_x_u = A_x(1,1:M_x-1,i)
-      A_x_l = A_x(1,1:M_x-1,i)
+      gx = Ax(2,:,i)
+      Ax_d = Ax(2,:,i)
+      Ax_u = Ax(1,1:Mx-1,i)
+      Ax_l = Ax(1,1:Mx-1,i)
 
       ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', M_x, M_x, 1, 1, one, conjg(A_x(:,:,i)), 3, psi(:,i), 1, &
-        zero, g_x, 1)
+      call zgbmv('N', Mx, Mx, 1, 1, one, conjg(Ax(:,:,i)), 3, psi(:,i), 1, &
+        zero, gx, 1)
 
       ! solve for psi at t=n+1/2
-      call zgtsv(M_x, 1, A_x_l, A_x_d, A_x_u, g_x, M_x, info)
-      psi(:,i) = g_x
+      call zgtsv(Mx, 1, Ax_l, Ax_d, Ax_u, gx, Mx, info)
+      psi(:,i) = gx
     enddo
     !$omp end parallel do
 
     ! vertical sweep
-    !$omp parallel do private(A_y_d,A_y_u,A_y_l,g_y)
-    do i=1,M_x
+    !$omp parallel do private(Ay_d,Ay_u,Ay_l,gy)
+    do i=1,Mx
       ! init temp arrays
-      g_y = A_y(2,:,i)
-      A_y_d = A_y(2,:,i)
-      A_y_u = A_y(1,1:M_y-1,i)
-      A_y_l = A_y(1,1:M_y-1,i)
+      gy = Ay(2,:,i)
+      Ay_d = Ay(2,:,i)
+      Ay_u = Ay(1,1:My-1,i)
+      Ay_l = Ay(1,1:My-1,i)
 
       ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', M_y, M_y, 1, 1, one, conjg(A_y(:,:,i)), 3, psi(i,:), 1, &
-        zero, g_y, 1)
+      call zgbmv('N', My, My, 1, 1, one, conjg(Ay(:,:,i)), 3, psi(i,:), 1, &
+        zero, gy, 1)
 
       ! solve for psi at t=n+1
-      call zgtsv(M_y, 1, A_y_l, A_y_d, A_y_u, g_y, M_y, info)
-      psi(i,:) = g_y
+      call zgtsv(My, 1, Ay_l, Ay_d, Ay_u, gy, My, info)
+      psi(i,:) = gy
     enddo
     !$omp end parallel do
 
-    deallocate(A_x_d, A_x_l, A_x_u, A_y_d, A_y_l, A_y_u, g_x, g_y)
+    deallocate(Ax_d, Ax_l, Ax_u, Ay_d, Ay_l, Ay_u, gx, gy)
   end subroutine
 end module

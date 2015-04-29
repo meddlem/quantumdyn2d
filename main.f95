@@ -6,25 +6,28 @@ program main
   use io
   implicit none
 
-  complex(dp), allocatable :: psi(:,:), A_x(:,:,:), A_y(:,:,:)
+  complex(dp), allocatable :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
   real(dp), allocatable    :: x(:,:), y(:,:), V(:,:)
-  real(dp) :: k_x, k_y, dx, dt, L_x, L_y
-  integer  :: M_x, M_y, n
+  real(dp) :: kx, ky, dx, dt, Lx, Ly
+  integer  :: Mx, My, n
 
-  call user_in(k_x, k_y, dx, dt, L_x, L_y, M_x, M_y, n)
-
-  allocate(psi(M_x,M_y), x(M_x,M_y), y(M_x,M_y), V(M_x,M_y), A_x(3,M_x,M_y), &
-    A_y(3,M_y,M_x))
+  ! initialize model parameters
+  call init_param(dx, dt, Lx, Ly, Mx, My, n)
+  
+  ! allocate arrays
+  allocate(psi(Mx,My), x(Mx,My), y(Mx,My), V(Mx,My), Ax(3,Mx,My), &
+    Ay(3,My,Mx))
   
   ! initialize simulation
-  call init_wavef(psi, x, y, dx, L_x, L_y, k_x, k_y, M_x, M_y)
-  call init_V(V, x, y, L_x, L_y)
-  call init_ops(A_x, A_y, V, dt, dx, M_x, M_y)
-  call animate_plot(L_x, L_y)
+  call user_in(kx, ky)
+  call init_wavef(psi, x, y, dx, Lx, Ly, kx, ky, Mx, My)
+  call init_V(V, x, y, Lx, Ly)
+  call init_ops(Ax, Ay, V, dt, dx, Mx, My)
+  call animate_plot(Lx, Ly)
 
-  call run_sim(psi, x, y, n, M_x, M_y, A_x, A_y)
+  call run_sim(psi, x, y, n, Mx, My, Ax, Ay)
   
   call close_plot()
 
-  deallocate(psi, x, y, V, A_x, A_y)
+  deallocate(psi, x, y, V, Ax, Ay)
 end program

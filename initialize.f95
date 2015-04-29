@@ -2,80 +2,94 @@ module initialize
   use constants
   implicit none
   private
-  public :: init_wavef, init_V, init_ops
+  public :: init_param, init_wavef, init_V, init_ops
 
 contains
+  subroutine init_param(dx,dt,Lx,Ly,Mx,My,n)
+    real(dp), intent(out) :: dx, dt, Lx, Ly
+    integer, intent(out)  :: Mx, My, n
+    
+    ! model parameters
+    dx = 0.1_dp
+    dt = 0.1_dp
+    Lx = 20._dp
+    Ly = 10._dp
+    Mx = floor(Lx/dx)
+    My = floor(Ly/dx)
+    n = 5000
+  end subroutine
   
-  subroutine init_wavef(psi, x, y, dx, L_x, L_y, k_x, k_y, M_x, M_y)
+  subroutine init_wavef(psi, x, y, dx, Lx, Ly, kx, ky, Mx, My)
     complex(dp), intent(inout) :: psi(:,:) 
     real(dp), intent(inout)    :: x(:,:), y(:,:)
-    real(dp), intent(in)       :: dx, L_x, L_y, k_x, k_y
-    integer, intent(in)        :: M_x, M_y
+    real(dp), intent(in)       :: dx, Lx, Ly, kx, ky
+    integer, intent(in)        :: Mx, My
     
-    real(dp), allocatable :: r(:,:), H_xy(:,:)
+    real(dp), allocatable :: r(:,:), Hxy(:,:)
     integer               :: i, j
 
-    allocate(r(M_x,M_y), H_xy(M_x,M_y))
+    allocate(r(Mx,My), Hxy(Mx,My))
     
     ! create grid
-    do i = 1,M_x
-      do j = 1,M_y
+    do i = 1,Mx
+      do j = 1,My
         x(i,j) = i*dx
         y(i,j) = j*dx
       enddo
     enddo
     
-    ! distance to grid center
-    r = sqrt((x - L_x/2)**2 + (y - L_y/2)**2) 
+    ! starting position for wavepacket
+    r = sqrt((x - Lx/2)**2 + (y - Ly/2)**2) 
 
     ! ISQW wavefunction
     !psi = cmplx(sin(3*pi*x/L)*sin(2*pi*y/L),0._dp,dp) * &
-    !  exp(cmplx(0._dp,k_x*x+k_y*y,dp))
+    !  exp(cmplx(0._dp,kx*x+ky*y,dp))
 
     ! gaussian wavepackets
-    H_xy = (x - L_x/2)*(y - L_y/2)**1
-    psi = H_xy*exp(-0.5_dp*r**2)*exp(cmplx(0._dp,k_x*x + k_y*y,dp))
+    Hxy = (x - Lx/2)*(y - Ly/2)**1
+    psi = exp(-0.5_dp*r**2)*exp(cmplx(0._dp,kx*x + ky*y,dp))
 
     ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*dx**2))
 
-    deallocate(r, H_xy)
+    deallocate(r, Hxy)
   end subroutine
 
-  subroutine init_V(V, x, y, L_x, L_y)
-    real(dp), intent(in)    :: x(:,:), y(:,:), L_x, L_y
+  subroutine init_V(V, x, y, Lx, Ly)
+    real(dp), intent(in)    :: x(:,:), y(:,:), Lx, Ly
     real(dp), intent(inout) :: V(:,:)
     
-    ! block/scattering potential
-    !V = 0._dp
-    !where(15._dp<x .and. x<19._dp) V = 80._dp
+    ! scattering potential
+    V = 80._dp
+    where(Ly/3<y .and. y<Ly*2/3) V = 0._dp
+    where(x>Lx/2) V = 0._dp
     
     ! harmonic potential
-    V = 1._dp*((x-L_x/2)**2 + (y-L_y/2)**2)
+    ! V = 1._dp*((x-Lx/2)**2 + (y-Ly/2)**2)
   end subroutine
     
-  subroutine init_ops(A_x, A_y, V, dt, dx, M_x, M_y)
-    complex(dp), intent(inout) :: A_x(:,:,:), A_y(:,:,:)
+  subroutine init_ops(Ax, Ay, V, dt, dx, Mx, My)
+    complex(dp), intent(inout) :: Ax(:,:,:), Ay(:,:,:)
     real(dp), intent(in)       :: V(:,:), dt, dx
-    integer, intent(in)        :: M_x, M_y
+    integer, intent(in)        :: Mx, My
 
     integer :: i, j
 
     ! construct ADI matrix operators, x-dir, band storage fmt
-    do i = 1,M_x
-      do j = 1,M_y
-        A_x(1,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
-        A_x(2,i,j) = cmplx(1._dp, 0.5_dp*dt*(2._dp/dx**2 + 0.5_dp*V(i,j)), dp)
-        A_x(3,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
+    do i = 1,Mx
+      do j = 1,My
+        Ax(1,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
+        Ax(2,i,j) = cmplx(1._dp, 0.5_dp*dt*(2._dp/dx**2 + 0.5_dp*V(i,j)), dp)
+        Ax(3,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
       enddo
     enddo
     
     ! construct ADI matrix operators, y-dir, band storage fmt
-    do i = 1,M_y
-      do j = 1,M_x
-        A_y(1,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
-        A_y(2,i,j) = cmplx(1._dp, 0.5_dp*dt*(2._dp/dx**2 + 0.5_dp*V(j,i)), dp)
-        A_y(3,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
+    do i = 1,My
+      do j = 1,Mx
+        Ay(1,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
+        Ay(2,i,j) = cmplx(1._dp, 0.5_dp*dt*(2._dp/dx**2 + 0.5_dp*V(j,i)), dp)
+        Ay(3,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
       enddo
     enddo
   end subroutine

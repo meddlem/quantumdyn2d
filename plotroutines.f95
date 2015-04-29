@@ -14,7 +14,7 @@ contains
     
     ! create a gnuplot command file
     open(10,access = 'sequential',file = 'matplot.plt')
-      write(10,*) 'set term x11' 
+      !write(10,*) 'set term x11' 
       write(10,*) 'set style line 1 lt 1 lc rgb "blue" lw 2 pt 2 ps 0.6'
       write(10,*) 'set style line 2 lt 1 lc rgb "red" lw 2 pt 2 ps 0.6'
       write(10,*) 'set style line 3 lt 1 lc rgb "purple" lw 2 pt 2 ps 0.6'

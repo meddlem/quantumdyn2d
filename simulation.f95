@@ -18,7 +18,7 @@ contains
     do i=1,n
       call solve_nxt(psi, Mx, My, Ax, Ay)
       
-      if (mod(i,5)==0) call plot_wavef(psi, x, y, Mx, My)
+      if (mod(i,10)==0) call plot_wavef(psi, x, y, Mx, My)
     enddo
   end subroutine
 

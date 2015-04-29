@@ -26,6 +26,7 @@ contains
     integer, intent(in)        :: Mx, My
     
     real(dp), allocatable :: r(:,:), Hxy(:,:)
+    real(dp)              :: A
     integer               :: i, j
 
     allocate(r(Mx,My), Hxy(Mx,My))
@@ -46,8 +47,9 @@ contains
     !  exp(cmplx(0._dp,kx*x+ky*y,dp))
 
     ! gaussian wavepackets
-    Hxy = (x - Lx/2)*(y - Ly/2)**1
-    psi = exp(-0.5_dp*r**2)*exp(cmplx(0._dp,kx*x + ky*y,dp))
+    A = 2._dp
+    Hxy = (x - Lx/2)*(y - Ly/2)
+    psi = exp(-0.5_dp*A*r**2)*exp(cmplx(0._dp,kx*x + ky*y,dp))
 
     ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*dx**2))
@@ -60,9 +62,9 @@ contains
     real(dp), intent(inout) :: V(:,:)
     
     ! scattering potential
-    V = 80._dp
+    V = 200._dp
     where(Ly*0.4_dp<y .and. y<Ly*0.6_dp) V = 0._dp
-    where(x>Lx/2) V = 0._dp
+    where(Lx*0.49_dp>x .or. x>Lx*0.51_dp) V = 0._dp
     
     ! harmonic potential
     ! V = 1._dp*((x-Lx/2)**2 + (y-Ly/2)**2)

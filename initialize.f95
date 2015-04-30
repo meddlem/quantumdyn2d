@@ -10,8 +10,8 @@ contains
     integer, intent(out)  :: Mx, My, n
     
     ! model parameters
-    dx = 0.05_dp
-    dt = 0.01_dp
+    dx = 0.1_dp
+    dt = 0.02_dp
     Lx = 30._dp
     Ly = 10._dp
     Mx = floor(Lx/dx)
@@ -19,17 +19,18 @@ contains
     n = 5000
   end subroutine
   
-  subroutine init_wavef(psi, x, y, dx, Lx, Ly, kx, ky, Mx, My)
+  subroutine init_wavef(psi, x, y, dx, Lx, Ly, kx, ky, Mx, My, V_type)
     complex(dp), intent(inout) :: psi(:,:) 
     real(dp), intent(inout)    :: x(:,:), y(:,:)
     real(dp), intent(in)       :: dx, Lx, Ly, kx, ky
-    integer, intent(in)        :: Mx, My
+    integer, intent(in)        :: Mx, My, V_type
     
     real(dp), allocatable :: r(:,:), Hxy(:,:)
     real(dp)              :: A
     integer               :: i, j
 
     allocate(r(Mx,My), Hxy(Mx,My))
+    A = 1._dp
     
     ! create grid
     do i = 1,Mx
@@ -40,14 +41,18 @@ contains
     enddo
     
     ! starting position for wavepacket
-    r = sqrt((x - Lx/4)**2 + (y - Ly/2)**2) 
+    if (V_type == 1) then
+      r = sqrt((x - Lx/2)**2 + (y - Ly/2)**2) 
+    elseif (V_type == 2) then
+      r = sqrt((x - Lx/4)**2 + (y - Ly/2)**2) 
+      A = 2._dp
+    endif
 
     ! ISQW wavefunction
     !psi = cmplx(sin(3*pi*x/L)*sin(2*pi*y/L),0._dp,dp) * &
     !  exp(cmplx(0._dp,kx*x+ky*y,dp))
 
     ! gaussian wavepackets
-    A = 2._dp
     Hxy = (x - Lx/2)*(y - Ly/2)
     psi = exp(-0.5_dp*A*r**2)*exp(cmplx(0._dp,kx*x + ky*y,dp))
 
@@ -57,17 +62,21 @@ contains
     deallocate(r, Hxy)
   end subroutine
 
-  subroutine init_V(V, x, y, Lx, Ly)
-    real(dp), intent(in)    :: x(:,:), y(:,:), Lx, Ly
+  subroutine init_V(V, V_type, x, y, kx, ky, Lx, Ly)
+    integer, intent(in)     :: V_type
+    real(dp), intent(in)    :: x(:,:), y(:,:), kx, ky, Lx, Ly
     real(dp), intent(inout) :: V(:,:)
     
-    ! scattering potential
-    V = 200._dp
-    where(Ly*0.4_dp<y .and. y<Ly*0.6_dp) V = 0._dp
-    where(Lx*0.49_dp>x .or. x>Lx*0.51_dp) V = 0._dp
-    
-    ! harmonic potential
-    ! V = 1._dp*((x-Lx/2)**2 + (y-Ly/2)**2)
+    if (V_type == 1) then
+      ! harmonic potential
+      V = 1._dp*((x-Lx/2)**2 + (y-Ly/2)**2)
+    elseif (V_type == 2) then
+      ! scattering potential: small aperture in wall
+      V = 2*(kx**2+ky**2)
+
+      where(Ly*0.4_dp<y .and. y<Ly*0.6_dp) V = 0._dp
+      where(Lx*0.49_dp>x .or. x>Lx*0.51_dp) V = 0._dp
+    endif
   end subroutine
     
   subroutine init_ops(Ax, Ay, V, dt, dx, Mx, My)

@@ -7,18 +7,19 @@ module simulation
   public :: run_sim
 
 contains
-  subroutine run_sim(psi, x, y, n, Mx, My, Ax, Ay)
+  subroutine run_sim(psi, x, y, n, Mx, My, Ax, Ay, plot_re)
     complex(dp), intent(inout) :: psi(:,:)
     complex(dp), intent(in)    :: Ax(:,:,:), Ay(:,:,:)
     real(dp), intent(in)       :: x(:,:), y(:,:)
     integer, intent(in)        :: n, Mx, My
+    logical, intent(in)        :: plot_re
 
     integer :: i
 
     do i=1,n
       call solve_nxt(psi, Mx, My, Ax, Ay)
       
-      if (mod(i,10)==0) call plot_wavef(psi, x, y, Mx, My)
+      if (mod(i,plot_interval)==0) call plot_wavef(psi, x, y, Mx, My, plot_re)
     enddo
   end subroutine
 

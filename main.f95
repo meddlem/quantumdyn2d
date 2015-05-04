@@ -1,33 +1,33 @@
 program main
   use constants
+  use structures 
   use initialize
   use simulation
-  use plotroutines
   use io
   implicit none
 
-  complex(dp), allocatable :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
-  real(dp), allocatable    :: x(:,:), y(:,:), V(:,:)
-  real(dp) :: kx, ky, dx, dt, Lx, Ly
-  integer  :: Mx, My, n
+  type(modl_par) :: Q
 
-  ! initialize model parameters
-  call init_param(dx, dt, Lx, Ly, Mx, My, n)
-  
-  ! allocate arrays
-  allocate(psi(Mx,My), x(Mx,My), y(Mx,My), V(Mx,My), Ax(3,Mx,My), &
-    Ay(3,My,Mx))
-  
-  ! initialize simulation
-  call user_in(kx, ky)
-  call init_wavef(psi, x, y, dx, Lx, Ly, kx, ky, Mx, My)
-  call init_V(V, x, y, Lx, Ly)
-  call init_ops(Ax, Ay, V, dt, dx, Mx, My)
-  call animate_plot(Lx, Ly)
+  call get_usr_args(Q)
+  call user_in(Q)
+  call init_param(Q)
+  call run_sim(Q)
 
-  call run_sim(psi, x, y, n, Mx, My, Ax, Ay)
-  
-  call close_plot()
+  contains
+    subroutine run_sim(Q)
+      type(modl_par), intent(in) :: Q
 
-  deallocate(psi, x, y, V, Ax, Ay)
+      complex(dp), allocatable :: psi(:,:)
+      real(dp), allocatable    :: x(:,:), y(:,:)
+      type(Ops)                :: O
+      
+      allocate(psi(Q%Mx,Q%My), x(Q%Mx,Q%My), y(Q%Mx,Q%My), O%Ax(3,Q%Mx,Q%My), &
+        O%Ay(3,Q%My,Q%Mx))
+      
+      call init_wavefunction(psi, x, y, Q)
+      call init_ops(O, Q) 
+      call time_evo(psi, x, y, O, Q)
+      
+      deallocate(psi, x, y, O%Ax, O%Ay)
+    end subroutine
 end program

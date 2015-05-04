@@ -1,95 +1,82 @@
 module initialize
   use constants
+  use structures 
   implicit none
   private
-  public :: init_param, init_wavef, init_V, init_ops
+  public :: init_param, init_wavefunction, init_ops
 
 contains
-  subroutine init_param(dx,dt,Lx,Ly,Mx,My,n)
-    real(dp), intent(out) :: dx, dt, Lx, Ly
-    integer, intent(out)  :: Mx, My, n
+  subroutine init_param(Q)
+    type(modl_par), intent(inout) :: Q
     
     ! model parameters
-    dx = 0.2_dp
-    dt = 0.01_dp
-    Lx = 20._dp
-    Ly = 10._dp
-    Mx = floor(Lx/dx)
-    My = floor(Ly/dx)
-    n = 5000
+    Q%dx = 0.05_dp
+    Q%dt = 0.02_dp
+    Q%Lx = 8._dp
+    Q%Ly = 8._dp
+    Q%Mx = floor(Q%Lx/Q%dx)
+    Q%My = floor(Q%Ly/Q%dx)
+    Q%N = 5000
   end subroutine
   
-  subroutine init_wavef(psi, x, y, dx, Lx, Ly, kx, ky, Mx, My)
+  subroutine init_wavefunction(psi, x, y, Q)
     complex(dp), intent(inout) :: psi(:,:) 
     real(dp), intent(inout)    :: x(:,:), y(:,:)
-    real(dp), intent(in)       :: dx, Lx, Ly, kx, ky
-    integer, intent(in)        :: Mx, My
+    type(modl_par), intent(in) :: Q
     
     real(dp), allocatable :: r(:,:), Hxy(:,:)
+    real(dp)              :: A
     integer               :: i, j
 
-    allocate(r(Mx,My), Hxy(Mx,My))
+    allocate(r(Q%Mx,Q%My), Hxy(Q%Mx,Q%My))
+    A = 1._dp
     
     ! create grid
-    do i = 1,Mx
-      do j = 1,My
-        x(i,j) = i*dx
-        y(i,j) = j*dx
+    do i = 1,Q%Mx
+      do j = 1,Q%My
+        x(i,j) = i*Q%dx
+        y(i,j) = j*Q%dx
       enddo
     enddo
     
     ! starting position for wavepacket
-    r = sqrt((x - Lx/4)**2 + (y - Ly/2)**2) 
+    if (Q%V_type == 1) then
+      r = sqrt((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) 
+    elseif (Q%V_type == 2) then
+      r = sqrt((x - Q%Lx/4)**2 + (y - Q%Ly/2)**2) 
+      A = 2._dp
+    endif
 
-    ! ISQW wavefunction
-    !psi = cmplx(sin(3*pi*x/L)*sin(2*pi*y/L),0._dp,dp) * &
-    !  exp(cmplx(0._dp,kx*x+ky*y,dp))
-
-    ! gaussian wavepackets
-    Hxy = (x - Lx/2)*(y - Ly/2)**1
-    psi = exp(-0.5_dp*r**2)*exp(cmplx(0._dp,kx*x + ky*y,dp))
+    Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
+    psi = exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
 
     ! normalize wavefunction
-    psi = psi/sqrt(sum(abs(psi)**2*dx**2))
+    psi = psi/sqrt(sum(abs(psi)**2*Q%dx**2))
 
     deallocate(r, Hxy)
   end subroutine
 
-  subroutine init_V(V, x, y, Lx, Ly)
-    real(dp), intent(in)    :: x(:,:), y(:,:), Lx, Ly
-    real(dp), intent(inout) :: V(:,:)
-    
-    ! scattering potential
-    V = 80._dp
-    where(Ly*0.4_dp<y .and. y<Ly*0.6_dp) V = 0._dp
-    where(x>Lx/2) V = 0._dp
-    
-    ! harmonic potential
-    ! V = 1._dp*((x-Lx/2)**2 + (y-Ly/2)**2)
-  end subroutine
-    
-  subroutine init_ops(Ax, Ay, V, dt, dx, Mx, My)
-    complex(dp), intent(inout) :: Ax(:,:,:), Ay(:,:,:)
-    real(dp), intent(in)       :: V(:,:), dt, dx
-    integer, intent(in)        :: Mx, My
+  subroutine init_ops(O, Q)
+    type(Ops), intent(inout)   :: O
+    type(modl_par), intent(in) :: Q
 
     integer :: i, j
 
-    ! construct ADI matrix operators, x-dir, band storage fmt
-    do i = 1,Mx
-      do j = 1,My
-        Ax(1,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
-        Ax(2,i,j) = cmplx(1._dp, 0.5_dp*dt*(2._dp/dx**2 + 0.5_dp*V(i,j)), dp)
-        Ax(3,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
+    ! init ADI matrix operators, x-dir, band storage fmt
+    do i = 1,Q%Mx
+      do j = 1,Q%My
+        O%Ax(1,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2
+        O%Ax(2,i,j) = one + i_u*Q%dt/Q%dx**2
+        O%Ax(3,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2
       enddo
     enddo
     
-    ! construct ADI matrix operators, y-dir, band storage fmt
-    do i = 1,My
-      do j = 1,Mx
-        Ay(1,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
-        Ay(2,i,j) = cmplx(1._dp, 0.5_dp*dt*(2._dp/dx**2 + 0.5_dp*V(j,i)), dp)
-        Ay(3,i,j) = cmplx(0._dp, -dt*0.5_dp/dx**2, dp)
+    ! init ADI matrix operators, y-dir, band storage fmt
+    do i = 1,Q%My
+      do j = 1,Q%Mx
+        O%Ay(1,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2 
+        O%Ay(2,i,j) = one + i_u*Q%dt/Q%dx**2
+        O%Ay(3,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2 
       enddo
     enddo
   end subroutine

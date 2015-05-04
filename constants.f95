@@ -9,8 +9,10 @@ module constants
   integer, parameter     :: dp = selected_real_kind(15,307)
   integer, parameter     :: lng = selected_int_kind(8)
 
-  real(dp), parameter    :: pi = 4._dp*atan(1._dp)
-  complex(dp), parameter :: one = (1._dp,0._dp)
-  complex(dp), parameter :: zero = (0._dp,0._dp)
+  integer, parameter     :: plot_interval = 50 
 
+  real(dp), parameter    :: pi = 4._dp*atan(1._dp)
+  complex(dp), parameter :: one = (1._dp, 0._dp)
+  complex(dp), parameter :: zero = (0._dp, 0._dp)
+  complex(dp), parameter :: i_u = (0._dp, 1._dp)
 end module

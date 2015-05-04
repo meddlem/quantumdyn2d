@@ -53,7 +53,7 @@ contains
     do i = 1,Q%My
       ! init temp arrays
       gx = Ax_tmp(2,:,i)
-      Ax_tmp(2,:,i) = Ax_tmp(2,:,i) + cmplx(0._dp, 0.25_dp*Q%dt*V(:,i), dp)
+      Ax_tmp(2,:,i) = Ax_tmp(2,:,i) + 0.25_dp*i_u*Q%dt*V(:,i)
 
       Ax_d = Ax_tmp(2,:,i) 
       Ax_u = Ax_tmp(1,1:Q%Mx-1,i) 
@@ -74,7 +74,7 @@ contains
     do i = 1,Q%Mx
       ! init temp arrays
       gy = Ay_tmp(2,:,i)
-      Ay_tmp(2,:,i) = Ay_tmp(2,:,i) + cmplx(0._dp, 0.25_dp*Q%dt*V(i,:), dp)
+      Ay_tmp(2,:,i) = Ay_tmp(2,:,i) + 0.25_dp*i_u*Q%dt*V(i,:)
 
       Ay_u = Ay_tmp(1,1:Q%My-1,i)
       Ay_d = Ay_tmp(2,:,i) 
@@ -99,11 +99,6 @@ contains
     type(model_parameters), intent(in) :: Q
 
     real(dp) :: a
-    
-    ! scattering potential
-    !V = 200._dp
-    !where(Q%Ly*0.4_dp<y .and. y<Q%Ly*0.6_dp) V = 0._dp
-    !where(Q%Lx*0.49_dp>x .or. x>Q%Lx*0.51_dp) V = 0._dp
     
     ! harmonic potential
     a = 0.1_dp

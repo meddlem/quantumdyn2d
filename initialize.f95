@@ -48,7 +48,7 @@ contains
     endif
 
     Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
-    psi = exp(-0.5_dp*A*r**2)*exp(cmplx(0._dp, Q%kx*x + Q%ky*y, dp))
+    psi = exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
 
     ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*Q%dx**2))
@@ -65,18 +65,18 @@ contains
     ! init ADI matrix operators, x-dir, band storage fmt
     do i = 1,Q%Mx
       do j = 1,Q%My
-        Ax(1,i,j) = cmplx(0._dp, -Q%dt*0.5_dp/Q%dx**2, dp)
-        Ax(2,i,j) = cmplx(1._dp, Q%dt/Q%dx**2, dp)
-        Ax(3,i,j) = cmplx(0._dp, -Q%dt*0.5_dp/Q%dx**2, dp)
+        Ax(1,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2
+        Ax(2,i,j) = one + i_u*Q%dt/Q%dx**2
+        Ax(3,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2
       enddo
     enddo
     
     ! init ADI matrix operators, y-dir, band storage fmt
     do i = 1,Q%My
       do j = 1,Q%Mx
-        Ay(1,i,j) = cmplx(0._dp, -Q%dt*0.5_dp/Q%dx**2, dp)
-        Ay(2,i,j) = cmplx(1._dp, Q%dt/Q%dx**2, dp)
-        Ay(3,i,j) = cmplx(0._dp, -Q%dt*0.5_dp/Q%dx**2, dp)
+        Ay(1,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2 
+        Ay(2,i,j) = one + i_u*Q%dt/Q%dx**2
+        Ay(3,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2 
       enddo
     enddo
   end subroutine

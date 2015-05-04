@@ -53,18 +53,17 @@ contains
     ! collect wavefunction at t=n+1
     psi = g
 
-    deallocate(Ax_d_tmp, Ax_l_tmp, Ax_u_tmp, g, Ax_tmp)
+    !deallocate(Ax_d_tmp, Ax_l_tmp, Ax_u_tmp, g, Ax_tmp)
   end subroutine
 
   pure subroutine potential(V, x, t, L)
     real(dp), intent(inout) :: V(:)
     real(dp), intent(in)    :: x(:), t, L
+
+    real(dp) :: a
     
-    ! block/scattering potential
-    !V = 0._dp
-    !where(28._dp<x .and. x<32._dp) V = 1._dp
-    
-    ! harmonic potential
-    V = 1._dp*(x-L/2)**2 !+ 0._dp*t
+    ! changing harmonic potential
+    a = 0.05_dp
+    V = (1._dp - 0.8_dp*sin(a*t))*(x-L/2)**2 !+ 0._dp*t
   end subroutine
 end module

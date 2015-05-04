@@ -12,8 +12,8 @@ contains
     ! model parameters
     Q%dx = 0.05_dp
     Q%dt = 0.02_dp
-    Q%Lx = 10._dp
-    Q%Ly = 10._dp
+    Q%Lx = 8._dp
+    Q%Ly = 8._dp
     Q%Mx = floor(Q%Lx/Q%dx)
     Q%My = floor(Q%Ly/Q%dx)
     Q%N = 5000
@@ -56,8 +56,8 @@ contains
     deallocate(r, Hxy)
   end subroutine
 
-  subroutine init_ops(Ax, Ay, Q)
-    complex(dp), intent(inout) :: Ax(:,:,:), Ay(:,:,:)
+  subroutine init_ops(O, Q)
+    type(Ops), intent(inout)   :: O
     type(modl_par), intent(in) :: Q
 
     integer :: i, j
@@ -65,18 +65,18 @@ contains
     ! init ADI matrix operators, x-dir, band storage fmt
     do i = 1,Q%Mx
       do j = 1,Q%My
-        Ax(1,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2
-        Ax(2,i,j) = one + i_u*Q%dt/Q%dx**2
-        Ax(3,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2
+        O%Ax(1,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2
+        O%Ax(2,i,j) = one + i_u*Q%dt/Q%dx**2
+        O%Ax(3,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2
       enddo
     enddo
     
     ! init ADI matrix operators, y-dir, band storage fmt
     do i = 1,Q%My
       do j = 1,Q%Mx
-        Ay(1,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2 
-        Ay(2,i,j) = one + i_u*Q%dt/Q%dx**2
-        Ay(3,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2 
+        O%Ay(1,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2 
+        O%Ay(2,i,j) = one + i_u*Q%dt/Q%dx**2
+        O%Ay(3,i,j) = -0.5_dp*i_u*Q%dt/Q%dx**2 
       enddo
     enddo
   end subroutine

@@ -8,10 +8,10 @@ module simulation
   public :: run_sim
 
 contains
-  subroutine run_sim(psi, x, y, Ax, Ay, Q)
+  subroutine run_sim(psi, x, y, O, Q)
     complex(dp), intent(inout) :: psi(:,:)
-    complex(dp), intent(in)    :: Ax(:,:,:), Ay(:,:,:)
     real(dp), intent(in)       :: x(:,:), y(:,:)
+    type(Ops), intent(in)      :: O
     type(modl_par), intent(in) :: Q
 
     real(dp), allocatable :: V(:,:)
@@ -21,8 +21,11 @@ contains
     call animate_plot(Q)
 
     do i = 1,Q%N
+      ! calculate potential
       call potential(V, x, y, i*Q%dt, Q) 
-      call solve_nxt(psi, V, Ax, Ay, Q)
+
+      ! time integration
+      call solve_nxt(psi, V, O, Q)
       
       if (mod(i,plot_interval) == 0) then
         call plot_wavef(psi, x, y, Q)
@@ -33,10 +36,10 @@ contains
     deallocate(V)
   end subroutine
 
-  subroutine solve_nxt(psi, V, Ax, Ay, Q)
+  subroutine solve_nxt(psi, V, O, Q)
     complex(dp), intent(inout) :: psi(:,:)
     real(dp), intent(in)       :: V(:,:)
-    complex(dp), intent(in)    :: Ax(:,:,:), Ay(:,:,:)
+    type(Ops), intent(in)      :: O
     type(modl_par), intent(in) :: Q
 
     complex(dp), allocatable :: Ax_tmp(:,:,:), Ay_tmp(:,:,:)
@@ -44,8 +47,8 @@ contains
     allocate(Ax_tmp(3,Q%Mx,Q%My), Ay_tmp(3,Q%My,Q%Mx))
     
     ! init temp arrays
-    Ax_tmp = Ax
-    Ay_tmp = Ay
+    Ax_tmp = O%Ax
+    Ay_tmp = O%Ay
     
     call h_sweep(psi, V, Ax_tmp, Q)
     call v_sweep(psi, V, Ay_tmp, Q)
@@ -120,8 +123,8 @@ contains
   end subroutine
 
   pure subroutine potential(V, x, y, t, Q)
-    real(dp), intent(inout) :: V(:,:)
-    real(dp), intent(in)    :: x(:,:), y(:,:), t
+    real(dp), intent(inout)    :: V(:,:)
+    real(dp), intent(in)       :: x(:,:), y(:,:), t
     type(modl_par), intent(in) :: Q
 
     real(dp) :: a

@@ -21,11 +21,10 @@ program main
   ! initialize simulation
   call user_in(kx, ky)
   call init_wavef(psi, x, y, dx, Lx, Ly, kx, ky, Mx, My)
-  call init_V(V, x, y, Lx, Ly)
-  call init_ops(Ax, Ay, V, dt, dx, Mx, My)
+  call init_ops(Ax, Ay, dt, dx, Mx, My)
   call animate_plot(Lx, Ly)
 
-  call run_sim(psi, x, y, n, Mx, My, Ax, Ay)
+  call run_sim(psi, V, x, y, n, Mx, My, Lx, Ly, Ax, Ay, dt)
   
   call close_plot()
 

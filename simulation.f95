@@ -13,7 +13,7 @@ contains
     real(dp), intent(inout)    :: V(:,:)
     complex(dp), intent(in)    :: Ax(:,:,:), Ay(:,:,:)
     real(dp), intent(in)       :: x(:,:), y(:,:)
-    type(model_parameters), intent(in) :: Q
+    type(modl_par), intent(in) :: Q
 
     integer  :: i
 
@@ -27,11 +27,12 @@ contains
   end subroutine
 
   subroutine solve_nxt(psi, x, y, V, t, Ax, Ay, Q)
+    ! split this routine up, its too large right now
     complex(dp), intent(inout) :: psi(:,:)
     real(dp), intent(inout)    :: V(:,:)
     complex(dp), intent(in)    :: Ax(:,:,:), Ay(:,:,:)
     real(dp), intent(in)       :: t, x(:,:), y(:,:)
-    type(model_parameters), intent(in) :: Q
+    type(modl_par), intent(in) :: Q
 
     complex(dp), allocatable :: gx(:), gy(:), Ax_d(:), Ax_l(:), &
                                 Ax_u(:), Ay_d(:), Ay_l(:), &
@@ -96,7 +97,7 @@ contains
   subroutine Potential(V, x, y, t, Q)
     real(dp), intent(inout) :: V(:,:)
     real(dp), intent(in)    :: x(:,:), y(:,:), t
-    type(model_parameters), intent(in) :: Q
+    type(modl_par), intent(in) :: Q
 
     real(dp) :: a
     

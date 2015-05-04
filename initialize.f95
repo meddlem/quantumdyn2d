@@ -7,7 +7,7 @@ module initialize
 
 contains
   subroutine init_param(Q)
-    type(model_parameters) :: Q
+    type(modl_par), intent(inout) :: Q
     
     ! model parameters
     Q%dx = 0.05_dp
@@ -22,7 +22,7 @@ contains
   subroutine init_wavef(psi, x, y, Q)
     complex(dp), intent(inout) :: psi(:,:) 
     real(dp), intent(inout)    :: x(:,:), y(:,:)
-    type(model_parameters)     :: Q
+    type(modl_par), intent(in) :: Q
     
     real(dp), allocatable :: r(:,:), Hxy(:,:)
     real(dp)              :: A
@@ -58,7 +58,7 @@ contains
 
   subroutine init_ops(Ax, Ay, Q)
     complex(dp), intent(inout) :: Ax(:,:,:), Ay(:,:,:)
-    type(model_parameters) :: Q
+    type(modl_par), intent(in) :: Q
 
     integer :: i, j
 

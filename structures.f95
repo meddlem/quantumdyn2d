@@ -2,7 +2,7 @@ module structures
   use constants
   implicit none
   
-  type model_parameters 
+  type modl_par 
    real(dp) :: kx 
    real(dp) :: ky
    real(dp) :: Lx

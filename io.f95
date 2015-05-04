@@ -7,7 +7,7 @@ module io
 contains
 
   subroutine get_usr_args(Q)
-    type(model_parameters), intent(inout) :: Q
+    type(modl_par), intent(inout) :: Q
 
     character(10) :: arg
     integer       :: i
@@ -29,7 +29,7 @@ contains
   end subroutine
 
   subroutine user_in(Q)
-    type(model_parameters), intent(inout) :: Q
+    type(modl_par), intent(inout) :: Q
     
     write(*,'(/,A,/)') '************ Input *************' 
     write(*,'(A)',advance='no') "kx = " 

@@ -9,7 +9,7 @@ program main
 
   complex(dp), allocatable :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
   real(dp), allocatable    :: x(:,:), y(:,:), V(:,:)
-  type(model_parameters)   :: Q
+  type(modl_par)           :: Q
 
   ! initialize model parameters
   call init_param(Q)

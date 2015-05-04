@@ -7,7 +7,7 @@ module plotroutines
 
 contains
   subroutine animate_plot(Q)
-    type(model_parameters) :: Q
+    type(modl_par), intent(in) :: Q
 
     integer :: ret
     
@@ -50,9 +50,9 @@ contains
   end subroutine
   
   subroutine plot_wavef(psi, x, y, Q)
-    complex(dp), intent(in) :: psi(:,:)
-    real(dp), intent(in)    :: x(:,:), y(:,:)
-    type(model_parameters)  :: Q
+    complex(dp), intent(in)    :: psi(:,:)
+    real(dp), intent(in)       :: x(:,:), y(:,:)
+    type(modl_par), intent(in) :: Q
 
     integer :: i, j
     character(50) :: rfmt

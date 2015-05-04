@@ -18,7 +18,9 @@ contains
     do i=1,n
       call solve_nxt(psi, x, i*dt, dt, V, L, M, Ax)
 
-      if(mod(i,10)==0) call plot_wavef(psi, x, V, M)
+      if (mod(i,plot_interval) == 0) then
+        call plot_wavef(psi, x, V, M)
+      endif
     enddo
   end subroutine
 
@@ -36,10 +38,10 @@ contains
     
     ! init temp arrays
     call potential(V, x, t, L)
-    
     Ax_tmp = Ax
     Ax_tmp(2,:) = Ax_tmp(2,:) + cmplx(0._dp, 0.5_dp*dt*V, dp)
 
+    ! get diagonals
     Ax_l_tmp = Ax_tmp(1,1:M-1)
     Ax_d_tmp = Ax_tmp(2,:)
     Ax_u_tmp = Ax_tmp(1,1:M-1)
@@ -53,7 +55,7 @@ contains
     ! collect wavefunction at t=n+1
     psi = g
 
-    !deallocate(Ax_d_tmp, Ax_l_tmp, Ax_u_tmp, g, Ax_tmp)
+    deallocate(Ax_d_tmp, Ax_l_tmp, Ax_u_tmp, g, Ax_tmp)
   end subroutine
 
   pure subroutine potential(V, x, t, L)

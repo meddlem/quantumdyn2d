@@ -19,17 +19,18 @@ contains
     n = 5000
   end subroutine
   
-  subroutine init_wavef(psi, x, y, dx, Lx, Ly, kx, ky, Mx, My)
+  subroutine init_wavef(psi, x, y, dx, Lx, Ly, kx, ky, Mx, My, V_type)
     complex(dp), intent(inout) :: psi(:,:) 
     real(dp), intent(inout)    :: x(:,:), y(:,:)
     real(dp), intent(in)       :: dx, Lx, Ly, kx, ky
-    integer, intent(in)        :: Mx, My
+    integer, intent(in)        :: Mx, My, V_type
     
     real(dp), allocatable :: r(:,:), Hxy(:,:)
     real(dp)              :: A
     integer               :: i, j
 
     allocate(r(Mx,My), Hxy(Mx,My))
+    A = 1._dp
     
     ! create grid
     do i = 1,Mx
@@ -40,14 +41,13 @@ contains
     enddo
     
     ! starting position for wavepacket
-    r = sqrt((x - Lx/2)**2 + (y - Ly/2)**2) 
+    if (V_type == 1) then
+      r = sqrt((x - Lx/2)**2 + (y - Ly/2)**2) 
+    elseif (V_type == 2) then
+      r = sqrt((x - Lx/4)**2 + (y - Ly/2)**2) 
+      A = 2._dp
+    endif
 
-    ! ISQW wavefunction
-    !psi = cmplx(sin(3*pi*x/L)*sin(2*pi*y/L),0._dp,dp) * &
-    !  exp(cmplx(0._dp,kx*x+ky*y,dp))
-
-    ! gaussian wavepackets
-    A = 1._dp
     Hxy = (x - Lx/2)*(y - Ly/2)
     psi = exp(-0.5_dp*A*r**2)*exp(cmplx(0._dp,kx*x + ky*y,dp))
 

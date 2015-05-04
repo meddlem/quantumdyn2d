@@ -27,7 +27,6 @@ contains
   end subroutine
 
   subroutine solve_nxt(psi, x, y, V, t, Ax, Ay, Q)
-    ! split this routine up, its too large right now
     complex(dp), intent(inout) :: psi(:,:)
     real(dp), intent(inout)    :: V(:,:)
     complex(dp), intent(in)    :: Ax(:,:,:), Ay(:,:,:)
@@ -37,7 +36,6 @@ contains
     complex(dp), allocatable :: gx(:), gy(:), Ax_d(:), Ax_l(:), &
                                 Ax_u(:), Ay_d(:), Ay_l(:), &
                                 Ay_u(:), Ax_tmp(:,:,:), Ay_tmp(:,:,:)
-    integer                  :: i, info
 
     allocate(Ax_d(Q%Mx), Ax_l(Q%Mx-1), Ax_u(Q%Mx-1), gx(Q%Mx), Ay_d(Q%My), &
       Ay_l(Q%My-1), Ay_u(Q%My-1), Ax_tmp(3,Q%Mx,Q%My), Ay_tmp(3,Q%My,Q%Mx), &
@@ -46,10 +44,24 @@ contains
     ! calc potential at timestep t
     call Potential(V, x, y, t, Q) 
 
+    ! init temp arrays
     Ax_tmp = Ax
     Ay_tmp = Ay
+    
+    call h_sweep(psi, V, Ax_tmp, Ax_d, Ax_u, Ax_l, gx, Q)
+    call v_sweep(psi, V, Ay_tmp, Ay_d, Ay_u, Ay_l, gy, Q)
 
-    ! horizontal sweep
+    deallocate(Ax_tmp, Ay_tmp, Ax_d, Ax_l, Ax_u, Ay_d, Ay_l, Ay_u, gx, gy)
+  end subroutine
+
+  subroutine h_sweep(psi, V, Ax_tmp, Ax_d, Ax_u, Ax_l, gx, Q)
+    complex(dp), intent(inout) :: psi(:,:), Ax_d(:), Ax_u(:), Ax_l(:), &
+      Ax_tmp(:,:,:), gx(:)
+    real(dp), intent(in)       :: V(:,:)
+    type(modl_par), intent(in) :: Q
+
+    integer :: i, info
+
     !$omp parallel do private(Ax_d,Ax_u,Ax_l,gx)
     do i = 1,Q%My
       ! init temp arrays
@@ -69,6 +81,15 @@ contains
       psi(:,i) = gx
     enddo
     !$omp end parallel do
+  end subroutine
+
+  subroutine v_sweep(psi, V, Ay_tmp, Ay_d, Ay_u, Ay_l, gy, Q)
+    complex(dp), intent(inout) :: psi(:,:), Ay_d(:), Ay_u(:), Ay_l(:), &
+      Ay_tmp(:,:,:), gy(:)
+    real(dp), intent(in)       :: V(:,:)
+    type(modl_par), intent(in) :: Q
+
+    integer :: i, info
 
     ! vertical sweep
     !$omp parallel do private(Ay_d,Ay_u,Ay_l,gy)
@@ -90,11 +111,9 @@ contains
       psi(i,:) = gy
     enddo
     !$omp end parallel do
-
-    deallocate(Ax_tmp, Ay_tmp, Ax_d, Ax_l, Ax_u, Ay_d, Ay_l, Ay_u, gx, gy)
   end subroutine
 
-  subroutine Potential(V, x, y, t, Q)
+  pure subroutine Potential(V, x, y, t, Q)
     real(dp), intent(inout) :: V(:,:)
     real(dp), intent(in)    :: x(:,:), y(:,:), t
     type(modl_par), intent(in) :: Q

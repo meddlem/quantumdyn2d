@@ -10,9 +10,9 @@ contains
     integer, intent(out)  :: Mx, My, n
     
     ! model parameters
-    dx = 0.1_dp
-    dt = 0.025_dp
-    Lx = 30._dp
+    dx = 0.05_dp
+    dt = 0.02_dp
+    Lx = 10._dp
     Ly = 10._dp
     Mx = floor(Lx/dx)
     My = floor(Ly/dx)

@@ -22,14 +22,14 @@ contains
       write(10,*) '2 "#0090ff", 3 "#0fffee", 4 "#90ff70", 5 "#ffee00",\' 
       write(10,*) '6 "#ff7000", 7 "#ee0000", 8 "#7f0000")'
       write(10,*) 'set pm3d'
-      write(10,*) 'set size ratio 0.5'
+      write(10,*) 'set size ratio 1'
       write(10,*) 'set hidden3d'
       write(10,*) 'set xrange [0:',Lx,']'
       write(10,*) 'set yrange [0:',Ly,']'
       write(10,*) 'set xlabel "x"'
       write(10,*) 'set ylabel "y" norotate'
       if (.not. plot_re) then
-        write(10,*) 'set cbrange [0:0.1]'
+        write(10,*) 'set cbrange [0:0.3]'
         write(10,*) 'set cblabel "density"'
       elseif (plot_re) then
         write(10,*) 'set cbrange [-0.2:0.2]'

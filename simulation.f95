@@ -20,7 +20,7 @@ contains
     do i=1,n
       call solve_nxt(psi, x, y, V, i*dt, dt, Mx, My, Lx, Ly, Ax, Ay)
       
-      if (mod(i,plot_interval)==0) then
+      if (mod(i,plot_interval) == 0) then
         call plot_wavef(psi, x, y, Mx, My, plot_re)
       endif
     enddo
@@ -95,6 +95,8 @@ contains
   subroutine Potential(V, x, y, t, Lx, Ly)
     real(dp), intent(inout) :: V(:,:)
     real(dp), intent(in)    :: x(:,:), y(:,:), t, Lx, Ly
+
+    real(dp) :: a
     
     ! scattering potential
     !V = 200._dp
@@ -102,6 +104,7 @@ contains
     !where(Lx*0.49_dp>x .or. x>Lx*0.51_dp) V = 0._dp
     
     ! harmonic potential
-    V = 1._dp*((x-Lx/2)**2 + (y-Ly/2)**2)
+    a = 0.1_dp
+    V = ((1-0.8_dp*sin(a*t))*(x-Lx/2)**2 + (y-Ly/2)**2)
   end subroutine
 end module

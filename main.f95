@@ -1,5 +1,6 @@
 program main
   use constants
+  use structures 
   use initialize
   use simulation
   use plotroutines
@@ -8,25 +9,23 @@ program main
 
   complex(dp), allocatable :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
   real(dp), allocatable    :: x(:,:), y(:,:), V(:,:)
-  real(dp) :: kx, ky, dx, dt, Lx, Ly
-  integer  :: Mx, My, n, V_type 
-  logical  :: plot_re
+  type(model_parameters)   :: Q
 
   ! initialize model parameters
-  call init_param(dx, dt, Lx, Ly, Mx, My, n)
+  call init_param(Q)
   
   ! allocate arrays
-  allocate(psi(Mx,My), x(Mx,My), y(Mx,My), V(Mx,My), Ax(3,Mx,My), &
-    Ay(3,My,Mx))
+  allocate(psi(Q%Mx,Q%My), x(Q%Mx,Q%My), y(Q%Mx,Q%My), V(Q%Mx,Q%My), &
+    Ax(3,Q%Mx,Q%My), Ay(3,Q%My,Q%Mx))
   
   ! initialize simulation
-  call user_in(kx, ky)
-  call get_usr_args(V_type, plot_re)
-  call init_ops(Ax, Ay, dt, dx, Mx, My)
-  call init_wavef(psi, x, y, dx, Lx, Ly, kx, ky, Mx, My, V_type)
-  call animate_plot(Lx, Ly, plot_re)
+  call get_usr_args(Q)
+  call user_in(Q)
+  call init_ops(Ax, Ay, Q) 
+  call init_wavef(psi, x, y, Q)
+  call animate_plot(Q)
 
-  call run_sim(psi, V, x, y, n, Mx, My, Lx, Ly, Ax, Ay, dt, plot_re)
+  call run_sim(psi, V, x, y, Ax, Ay, Q)
   
   call close_plot()
 

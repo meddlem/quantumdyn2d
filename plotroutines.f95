@@ -1,13 +1,13 @@
 module plotroutines
   use constants
+  use structures 
   implicit none
   private
   public :: plot_wavef, close_plot, animate_plot
 
 contains
-  subroutine animate_plot(Lx, Ly, plot_re)
-    real(dp), intent(in) :: Lx, Ly
-    logical, intent(in)  :: plot_re
+  subroutine animate_plot(Q)
+    type(model_parameters) :: Q
 
     integer :: ret
     
@@ -24,14 +24,14 @@ contains
       write(10,*) 'set pm3d'
       write(10,*) 'set size ratio 1'
       write(10,*) 'set hidden3d'
-      write(10,*) 'set xrange [0:',Lx,']'
-      write(10,*) 'set yrange [0:',Ly,']'
+      write(10,*) 'set xrange [0:',Q%Lx,']'
+      write(10,*) 'set yrange [0:',Q%Ly,']'
       write(10,*) 'set xlabel "x"'
       write(10,*) 'set ylabel "y" norotate'
-      if (.not. plot_re) then
+      if (.not. Q%plot_re) then
         write(10,*) 'set cbrange [0:0.3]'
         write(10,*) 'set cblabel "density"'
-      elseif (plot_re) then
+      elseif (Q%plot_re) then
         write(10,*) 'set cbrange [-0.2:0.2]'
         write(10,*) 'set cblabel "Re(Psi)"'
       endif
@@ -49,37 +49,35 @@ contains
     call system("gnuplot matplot.plt &",ret)
   end subroutine
   
-  subroutine plot_wavef(psi, x, y, Mx, My, plot_re)
+  subroutine plot_wavef(psi, x, y, Q)
     complex(dp), intent(in) :: psi(:,:)
     real(dp), intent(in)    :: x(:,:), y(:,:)
-    integer, intent(in)     :: Mx, My
-    logical, intent(in)     :: plot_re
+    type(model_parameters)  :: Q
 
     integer :: i, j
     character(50) :: rfmt
 
     rfmt = '(F10.5,1X,F10.5,1X,F10.5)' 
     
-    if (plot_re) then
+    if (Q%plot_re) then
       open(11,access = 'sequential',status = 'replace',file = 'plotfifo.dat')
-        do i = 1,Mx
-          do j = 1,My
-            write(11,rfmt) x(i,j), y(i,j), real(psi(i,j)) ! write plot data to pipe 
+        do i = 1,Q%Mx
+          do j = 1,Q%My
+            write(11,rfmt) x(i,j), y(i,j), real(psi(i,j)) ! write plot data
           enddo
-          write(11,*) '' ! add space between different xvals, needed for gnuplot
+          write(11,*) '' ! add space between different xvals, for gnuplot
         enddo
       close(11)
     else 
       open(11,access = 'sequential',status = 'replace',file = 'plotfifo.dat')
-        do i = 1,Mx
-          do j = 1,My
-            write(11,rfmt) x(i,j), y(i,j), abs(psi(i,j))**2 ! write plot data to pipe 
+        do i = 1,Q%Mx
+          do j = 1,Q%My
+            write(11,rfmt) x(i,j), y(i,j), abs(psi(i,j))**2 ! write plot data
           enddo
-          write(11,*) '' ! add space between different xvals, needed for gnuplot
+          write(11,*) '' ! add space between different xvals, for gnuplot
         enddo
       close(11)
     endif
-
   end subroutine
 
   subroutine close_plot()

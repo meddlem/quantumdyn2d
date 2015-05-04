@@ -1,5 +1,6 @@
 module simulation
   use constants
+  use structures 
   use plotroutines
   use omp_lib
   implicit none
@@ -7,84 +8,84 @@ module simulation
   public :: run_sim
 
 contains
-  subroutine run_sim(psi, V, x, y, n, Mx, My, Lx, Ly, Ax, Ay, dt, plot_re)
+  subroutine run_sim(psi, V, x, y, Ax, Ay, Q)
     complex(dp), intent(inout) :: psi(:,:)
     real(dp), intent(inout)    :: V(:,:)
     complex(dp), intent(in)    :: Ax(:,:,:), Ay(:,:,:)
-    real(dp), intent(in)       :: x(:,:), y(:,:), dt, Lx, Ly
-    integer, intent(in)        :: n, Mx, My
-    logical, intent(in)        :: plot_re
+    real(dp), intent(in)       :: x(:,:), y(:,:)
+    type(model_parameters), intent(in) :: Q
 
     integer  :: i
 
-    do i=1,n
-      call solve_nxt(psi, x, y, V, i*dt, dt, Mx, My, Lx, Ly, Ax, Ay)
+    do i=1,Q%N
+      call solve_nxt(psi, x, y, V, i*Q%dt, Ax, Ay, Q)
       
       if (mod(i,plot_interval) == 0) then
-        call plot_wavef(psi, x, y, Mx, My, plot_re)
+        call plot_wavef(psi, x, y, Q)
       endif
     enddo
   end subroutine
 
-  subroutine solve_nxt(psi, x, y, V, t, dt, Mx, My, Lx, Ly, Ax, Ay)
+  subroutine solve_nxt(psi, x, y, V, t, Ax, Ay, Q)
     complex(dp), intent(inout) :: psi(:,:)
     real(dp), intent(inout)    :: V(:,:)
     complex(dp), intent(in)    :: Ax(:,:,:), Ay(:,:,:)
-    real(dp), intent(in)       :: t, dt, Lx, Ly, x(:,:), y(:,:)
-    integer, intent(in)        :: Mx, My
+    real(dp), intent(in)       :: t, x(:,:), y(:,:)
+    type(model_parameters), intent(in) :: Q
 
     complex(dp), allocatable :: gx(:), gy(:), Ax_d(:), Ax_l(:), &
                                 Ax_u(:), Ay_d(:), Ay_l(:), &
                                 Ay_u(:), Ax_tmp(:,:,:), Ay_tmp(:,:,:)
     integer                  :: i, info
 
-    allocate(Ax_d(Mx), Ax_l(Mx-1), Ax_u(Mx-1), gx(Mx), Ay_d(My), &
-      Ay_l(My-1), Ay_u(My-1), Ax_tmp(3,Mx,My), Ay_tmp(3,My,Mx), gy(My))
+    allocate(Ax_d(Q%Mx), Ax_l(Q%Mx-1), Ax_u(Q%Mx-1), gx(Q%Mx), Ay_d(Q%My), &
+      Ay_l(Q%My-1), Ay_u(Q%My-1), Ax_tmp(3,Q%Mx,Q%My), Ay_tmp(3,Q%My,Q%Mx), &
+      gy(Q%My))
     
     ! calc potential at timestep t
-    call Potential(V, x, y, t, Lx, Ly) 
+    call Potential(V, x, y, t, Q) 
 
     Ax_tmp = Ax
     Ay_tmp = Ay
 
     ! horizontal sweep
     !$omp parallel do private(Ax_d,Ax_u,Ax_l,gx)
-    do i = 1,My
+    do i = 1,Q%My
       ! init temp arrays
       gx = Ax_tmp(2,:,i)
-      Ax_tmp(2,:,i) = Ax_tmp(2,:,i) + cmplx(0._dp, 0.25_dp*dt*V(:,i), dp)
+      Ax_tmp(2,:,i) = Ax_tmp(2,:,i) + cmplx(0._dp, 0.25_dp*Q%dt*V(:,i), dp)
 
       Ax_d = Ax_tmp(2,:,i) 
-      Ax_u = Ax_tmp(1,1:Mx-1,i) 
-      Ax_l = Ax_tmp(1,1:Mx-1,i)
+      Ax_u = Ax_tmp(1,1:Q%Mx-1,i) 
+      Ax_l = Ax_tmp(1,1:Q%Mx-1,i)
 
       ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', Mx, Mx, 1, 1, one, conjg(Ax_tmp(:,:,i)), 3, psi(:,i), &
-        1, zero, gx, 1)
+      call zgbmv('N', Q%Mx, Q%Mx, 1, 1, one, conjg(Ax_tmp(:,:,i)), 3, &
+        psi(:,i), 1, zero, gx, 1)
 
       ! solve for psi at t=n+1/2
-      call zgtsv(Mx, 1, Ax_l, Ax_d, Ax_u, gx, Mx, info)
+      call zgtsv(Q%Mx, 1, Ax_l, Ax_d, Ax_u, gx, Q%Mx, info)
       psi(:,i) = gx
     enddo
     !$omp end parallel do
 
     ! vertical sweep
     !$omp parallel do private(Ay_d,Ay_u,Ay_l,gy)
-    do i = 1,Mx
+    do i = 1,Q%Mx
       ! init temp arrays
       gy = Ay_tmp(2,:,i)
-      Ay_tmp(2,:,i) = Ay_tmp(2,:,i) + cmplx(0._dp, 0.25_dp*dt*V(i,:), dp)
+      Ay_tmp(2,:,i) = Ay_tmp(2,:,i) + cmplx(0._dp, 0.25_dp*Q%dt*V(i,:), dp)
 
-      Ay_u = Ay_tmp(1,1:My-1,i)
+      Ay_u = Ay_tmp(1,1:Q%My-1,i)
       Ay_d = Ay_tmp(2,:,i) 
-      Ay_l = Ay_tmp(1,1:My-1,i)
+      Ay_l = Ay_tmp(1,1:Q%My-1,i)
 
       ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', My, My, 1, 1, one, conjg(Ay_tmp(:,:,i)), 3, psi(i,:), &
-        1, zero, gy, 1)
+      call zgbmv('N', Q%My, Q%My, 1, 1, one, conjg(Ay_tmp(:,:,i)), 3, &
+        psi(i,:), 1, zero, gy, 1)
 
       ! solve for psi at t=n+1
-      call zgtsv(My, 1, Ay_l, Ay_d, Ay_u, gy, My, info)
+      call zgtsv(Q%My, 1, Ay_l, Ay_d, Ay_u, gy, Q%My, info)
       psi(i,:) = gy
     enddo
     !$omp end parallel do
@@ -92,19 +93,20 @@ contains
     deallocate(Ax_tmp, Ay_tmp, Ax_d, Ax_l, Ax_u, Ay_d, Ay_l, Ay_u, gx, gy)
   end subroutine
 
-  subroutine Potential(V, x, y, t, Lx, Ly)
+  subroutine Potential(V, x, y, t, Q)
     real(dp), intent(inout) :: V(:,:)
-    real(dp), intent(in)    :: x(:,:), y(:,:), t, Lx, Ly
+    real(dp), intent(in)    :: x(:,:), y(:,:), t
+    type(model_parameters), intent(in) :: Q
 
     real(dp) :: a
     
     ! scattering potential
     !V = 200._dp
-    !where(Ly*0.4_dp<y .and. y<Ly*0.6_dp) V = 0._dp
-    !where(Lx*0.49_dp>x .or. x>Lx*0.51_dp) V = 0._dp
+    !where(Q%Ly*0.4_dp<y .and. y<Q%Ly*0.6_dp) V = 0._dp
+    !where(Q%Lx*0.49_dp>x .or. x>Q%Lx*0.51_dp) V = 0._dp
     
     ! harmonic potential
     a = 0.1_dp
-    V = ((1-0.8_dp*sin(a*t))*(x-Lx/2)**2 + (y-Ly/2)**2)
+    V = ((1-0.8_dp*sin(a*t))*(x-Q%Lx/2)**2 + (y-Q%Ly/2)**2)
   end subroutine
 end module

@@ -5,10 +5,10 @@ module simulation
   use omp_lib
   implicit none
   private
-  public :: run_sim
+  public :: time_evo
 
 contains
-  subroutine run_sim(psi, x, y, O, Q)
+  subroutine time_evo(psi, x, y, O, Q)
     complex(dp), intent(inout) :: psi(:,:)
     real(dp), intent(in)       :: x(:,:), y(:,:)
     type(Ops), intent(in)      :: O

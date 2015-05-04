@@ -3,7 +3,7 @@ module initialize
   use structures 
   implicit none
   private
-  public :: init_param, init_wavef, init_ops
+  public :: init_param, init_wavefunction, init_ops
 
 contains
   subroutine init_param(Q)
@@ -19,7 +19,7 @@ contains
     Q%N = 5000
   end subroutine
   
-  subroutine init_wavef(psi, x, y, Q)
+  subroutine init_wavefunction(psi, x, y, Q)
     complex(dp), intent(inout) :: psi(:,:) 
     real(dp), intent(inout)    :: x(:,:), y(:,:)
     type(modl_par), intent(in) :: Q

@@ -48,38 +48,38 @@ contains
     
     ! init temp arrays
     Ax_tmp = O%Ax 
-    Ax_tmp(2,:,:) = Ax_tmp(2,:,:) + 0.25_dp*i_u*Q%dt*V
-
     Ay_tmp = O%Ay
+    Ax_tmp(2,:,:) = Ax_tmp(2,:,:) + 0.25_dp*i_u*Q%dt*V
     Ay_tmp(2,:,:) = Ay_tmp(2,:,:) + 0.25_dp*i_u*Q%dt*transpose(V)
-    
-    call h_sweep(psi, Ax_tmp, Q)
-    call v_sweep(psi, Ay_tmp, Q)
+
+    ! sweep lattice in x and y direction    
+    call x_sweep(psi, Ax_tmp, Q)
+    call y_sweep(psi, Ay_tmp, Q)
 
     deallocate(Ax_tmp, Ay_tmp)
   end subroutine
 
-  subroutine h_sweep(psi, Ax_tmp, Q)
-    complex(dp), intent(inout) :: psi(:,:), Ax_tmp(:,:,:)
+  subroutine x_sweep(psi, Ax, Q)
+    complex(dp), intent(inout) :: psi(:,:), Ax(:,:,:)
     type(modl_par), intent(in) :: Q
 
     complex(dp), allocatable :: gx(:,:)
     integer                  :: i, info
     
     allocate(gx(Q%Mx,Q%My))
-    gx = Ax_tmp(1,:,:)
+    gx = Ax(1,:,:)
 
     !$omp parallel do
     do i = 1,Q%My
       ! init temp arrays
 
       ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', Q%Mx, Q%Mx, 1, 1, one, conjg(Ax_tmp(:,:,i)), 3, &
+      call zgbmv('N', Q%Mx, Q%Mx, 1, 1, one, conjg(Ax(:,:,i)), 3, &
         psi(:,i), 1, zero, gx(:,i), 1)
 
       ! solve resulting tridiagonal system for psi at t=n+1/2
-      call zgtsv(Q%Mx, 1, Ax_tmp(1,1:Q%Mx-1,i), Ax_tmp(2,:,i), &
-        Ax_tmp(3,1:Q%Mx-1,i), gx(:,i), Q%Mx, info)
+      call zgtsv(Q%Mx, 1, Ax(1,1:Q%Mx-1,i), Ax(2,:,i), Ax(3,1:Q%Mx-1,i), &
+        gx(:,i), Q%Mx, info)
       
       psi(:,i) = gx(:,i)
     enddo
@@ -88,26 +88,26 @@ contains
     deallocate(gx)
   end subroutine
 
-  subroutine v_sweep(psi, Ay_tmp, Q)
-    complex(dp), intent(inout) :: psi(:,:), Ay_tmp(:,:,:)
+  subroutine y_sweep(psi, Ay, Q)
+    complex(dp), intent(inout) :: psi(:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
 
     complex(dp), allocatable :: gy(:,:)
     integer                  :: i, info
     
     allocate(gy(Q%My,Q%Mx))
-    gy = Ay_tmp(1,:,:)
+    gy = Ay(1,:,:)
 
     !$omp parallel do 
     do i = 1,Q%Mx
 
       ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', Q%My, Q%My, 1, 1, one, conjg(Ay_tmp(:,:,i)), 3, &
+      call zgbmv('N', Q%My, Q%My, 1, 1, one, conjg(Ay(:,:,i)), 3, &
         psi(i,:), 1, zero, gy(:,i), 1)
 
       ! solve tridiagonal system for psi at t=n+1
-      call zgtsv(Q%My, 1, Ay_tmp(1,1:Q%My-1,i), Ay_tmp(2,:,i), &
-        Ay_tmp(3,1:Q%My-1,i), gy(:,i), Q%My, info)
+      call zgtsv(Q%My, 1, Ay(1,1:Q%My-1,i), Ay(2,:,i), Ay(3,1:Q%My-1,i), &
+        gy(:,i), Q%My, info)
 
       psi(i,:) = gy(:,i)
     enddo

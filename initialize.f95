@@ -49,7 +49,7 @@ contains
     endif
 
     Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
-    psi = exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
+    psi = Hxy*exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
 
     ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*Q%dx**2))

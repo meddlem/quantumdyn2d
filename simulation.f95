@@ -122,6 +122,7 @@ contains
     type(modl_par), intent(in) :: Q
 
     ! harmonic potential
-    V = ((1-0.8_dp*sin(Q%a*t))*(x-Q%Lx/2)**2 + (y-Q%Ly/2)**2)
+    V = (1-0.8_dp*sin(Q%a*t))*(x-Q%Lx/2)**2 + &
+      (1-0.7_dp*sin(Q%a*t))*(y-Q%Ly/2)**2
   end subroutine
 end module

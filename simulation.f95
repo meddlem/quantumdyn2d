@@ -47,79 +47,73 @@ contains
     allocate(Ax_tmp(3,Q%Mx,Q%My), Ay_tmp(3,Q%My,Q%Mx))
     
     ! init temp arrays
-    Ax_tmp = O%Ax
+    Ax_tmp = O%Ax 
+    Ax_tmp(2,:,:) = Ax_tmp(2,:,:) + 0.25_dp*i_u*Q%dt*V
+
     Ay_tmp = O%Ay
+    Ay_tmp(2,:,:) = Ay_tmp(2,:,:) + 0.25_dp*i_u*Q%dt*transpose(V)
     
-    call h_sweep(psi, V, Ax_tmp, Q)
-    call v_sweep(psi, V, Ay_tmp, Q)
+    call h_sweep(psi, Ax_tmp, Q)
+    call v_sweep(psi, Ay_tmp, Q)
 
     deallocate(Ax_tmp, Ay_tmp)
   end subroutine
 
-  subroutine h_sweep(psi, V, Ax_tmp, Q)
+  subroutine h_sweep(psi, Ax_tmp, Q)
     complex(dp), intent(inout) :: psi(:,:), Ax_tmp(:,:,:)
-    real(dp), intent(in)       :: V(:,:)
     type(modl_par), intent(in) :: Q
 
-    complex(dp), allocatable :: gx(:), Ax_d(:), Ax_l(:), Ax_u(:)
-    integer :: i, info
+    complex(dp), allocatable :: gx(:,:)
+    integer                  :: i, info
     
-    allocate(Ax_d(Q%Mx), Ax_l(Q%Mx-1), Ax_u(Q%Mx-1), gx(Q%Mx))
+    allocate(gx(Q%Mx,Q%My))
+    gx = Ax_tmp(1,:,:)
 
-    !$omp parallel do private(Ax_d,Ax_u,Ax_l,gx)
+    !$omp parallel do
     do i = 1,Q%My
       ! init temp arrays
-      Ax_tmp(2,:,i) = Ax_tmp(2,:,i) + 0.25_dp*i_u*Q%dt*V(:,i)
-
-      gx = Ax_tmp(2,:,i)
-      Ax_d = Ax_tmp(2,:,i) 
-      Ax_u = Ax_tmp(1,1:Q%Mx-1,i) 
-      Ax_l = Ax_tmp(1,1:Q%Mx-1,i)
 
       ! explicit part of calculation, mat-vec multiplication
       call zgbmv('N', Q%Mx, Q%Mx, 1, 1, one, conjg(Ax_tmp(:,:,i)), 3, &
-        psi(:,i), 1, zero, gx, 1)
+        psi(:,i), 1, zero, gx(:,i), 1)
 
       ! solve resulting tridiagonal system for psi at t=n+1/2
-      call zgtsv(Q%Mx, 1, Ax_l, Ax_d, Ax_u, gx, Q%Mx, info)
-      psi(:,i) = gx
+      call zgtsv(Q%Mx, 1, Ax_tmp(1,1:Q%Mx-1,i), Ax_tmp(2,:,i), &
+        Ax_tmp(3,1:Q%Mx-1,i), gx(:,i), Q%Mx, info)
+      
+      psi(:,i) = gx(:,i)
     enddo
     !$omp end parallel do
 
-    deallocate(Ax_d, Ax_l, Ax_u, gx)
+    deallocate(gx)
   end subroutine
 
-  subroutine v_sweep(psi, V, Ay_tmp, Q)
+  subroutine v_sweep(psi, Ay_tmp, Q)
     complex(dp), intent(inout) :: psi(:,:), Ay_tmp(:,:,:)
-    real(dp), intent(in)       :: V(:,:)
     type(modl_par), intent(in) :: Q
 
-    complex(dp), allocatable :: gy(:), Ay_d(:), Ay_l(:), Ay_u(:)
-    integer :: i, info
+    complex(dp), allocatable :: gy(:,:)
+    integer                  :: i, info
     
-    allocate(Ay_d(Q%My), Ay_l(Q%My-1), Ay_u(Q%My-1), gy(Q%My))
+    allocate(gy(Q%My,Q%Mx))
+    gy = Ay_tmp(1,:,:)
 
-    !$omp parallel do private(Ay_d,Ay_u,Ay_l,gy)
+    !$omp parallel do 
     do i = 1,Q%Mx
-      ! init temp arrays
-      gy = Ay_tmp(2,:,i)
-      Ay_tmp(2,:,i) = Ay_tmp(2,:,i) + 0.25_dp*i_u*Q%dt*V(i,:)
-
-      Ay_u = Ay_tmp(1,1:Q%My-1,i)
-      Ay_d = Ay_tmp(2,:,i) 
-      Ay_l = Ay_tmp(1,1:Q%My-1,i)
 
       ! explicit part of calculation, mat-vec multiplication
       call zgbmv('N', Q%My, Q%My, 1, 1, one, conjg(Ay_tmp(:,:,i)), 3, &
-        psi(i,:), 1, zero, gy, 1)
+        psi(i,:), 1, zero, gy(:,i), 1)
 
       ! solve tridiagonal system for psi at t=n+1
-      call zgtsv(Q%My, 1, Ay_l, Ay_d, Ay_u, gy, Q%My, info)
-      psi(i,:) = gy
+      call zgtsv(Q%My, 1, Ay_tmp(1,1:Q%My-1,i), Ay_tmp(2,:,i), &
+        Ay_tmp(3,1:Q%My-1,i), gy(:,i), Q%My, info)
+
+      psi(i,:) = gy(:,i)
     enddo
     !$omp end parallel do
 
-    deallocate(Ay_d, Ay_l, Ay_u, gy)
+    deallocate(gy)
   end subroutine
 
   pure subroutine potential(V, x, y, t, Q)

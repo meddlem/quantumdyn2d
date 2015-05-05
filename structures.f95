@@ -3,18 +3,19 @@ module structures
   implicit none
   
   type modl_par 
-    ! data type that contains all model parameters
+    ! data type that contains all model parameters 
     
     real(dp) :: kx 
     real(dp) :: ky
-    real(dp) :: Lx
-    real(dp) :: Ly
-    real(dp) :: dx
+    real(dp) :: Lx ! lattice length in x-dir
+    real(dp) :: Ly ! lattice length in y-dir
+    real(dp) :: dx 
     real(dp) :: dt
+    real(dp) :: a  ! time constant potential
 
-    integer :: Mx
+    integer :: Mx ! lattice size in x-dir
     integer :: My
-    integer :: N
+    integer :: N  ! number of time steps
     integer :: V_type
 
     logical :: plot_re

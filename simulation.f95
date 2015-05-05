@@ -121,10 +121,7 @@ contains
     real(dp), intent(in)       :: x(:,:), y(:,:), t
     type(modl_par), intent(in) :: Q
 
-    real(dp) :: a
-    
     ! harmonic potential
-    a = 0.1_dp
-    V = ((1-0.8_dp*sin(a*t))*(x-Q%Lx/2)**2 + (y-Q%Ly/2)**2)
+    V = ((1-0.8_dp*sin(Q%a*t))*(x-Q%Lx/2)**2 + (y-Q%Ly/2)**2)
   end subroutine
 end module

@@ -16,6 +16,7 @@ contains
     Q%Ly = 7._dp
     Q%Mx = floor(Q%Lx/Q%dx)
     Q%My = floor(Q%Ly/Q%dx)
+    Q%a = 0.2_dp
     Q%N = 5000
   end subroutine
   

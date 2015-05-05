@@ -40,7 +40,7 @@ contains
 
     allocate(r(Q%Mx,Q%My), Hxy(Q%Mx,Q%My))
     
-    ! create grid
+    ! create meshgrid
     do i = 1,Q%Mx
       do j = 1,Q%My
         x(i,j) = i*Q%dx
@@ -59,28 +59,27 @@ contains
       A = 2._dp
     endif
 
+    ! calc and normalize wavefunction
     psi = Hxy*exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
-
-    ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*Q%dx**2))
 
     deallocate(r, Hxy)
   end subroutine
 
-  subroutine init_ops(O, Q)
-    type(Ops), intent(inout)   :: O
+  subroutine init_ops(Ax, Ay, Q)
+    complex(dp), intent(inout) :: Ax(:,:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
 
     integer :: i
 
     ! init ADI matrix operators, x-dir, band storage fmt
-    O%Ax(1,:,:) = -0.5_dp*i_u*Q%dt/Q%dx**2
-    O%Ax(2,:,:) = one + i_u*Q%dt/Q%dx**2
-    O%Ax(3,:,:) = O%Ax(1,:,:)
+    Ax(1,:,:) = -0.5_dp*i_u*Q%dt/Q%dx**2
+    Ax(2,:,:) = one + i_u*Q%dt/Q%dx**2
+    Ax(3,:,:) = Ax(1,:,:)
     
     ! init ADI matrix operators, y-dir, band storage fmt
     do i = 1,3
-      O%Ay(i,:,:) = transpose(O%Ax(i,:,:))
+      Ay(i,:,:) = transpose(Ax(i,:,:))
     enddo
   end subroutine
 end module 

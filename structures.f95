@@ -15,17 +15,10 @@ module structures
 
     integer :: Mx ! lattice size in x-dir
     integer :: My
-    integer :: N  ! number of time steps
+    integer :: N  ! number of time steps/iterations
     integer :: V_type
     integer :: plot_interval
 
     logical :: plot_re
-  end type
-  
-  type Ops
-    ! data type that contains the ADI matrix operators
-
-    complex(dp), allocatable :: Ax(:,:,:) 
-    complex(dp), allocatable :: Ay(:,:,:) 
   end type
 end module

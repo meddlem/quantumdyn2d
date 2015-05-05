@@ -21,8 +21,8 @@ program main
       real(dp), allocatable    :: x(:,:), y(:,:)
       type(Ops)                :: O
       
-      allocate(psi(Q%Mx,Q%My), x(Q%Mx,Q%My), y(Q%Mx,Q%My), O%Ax(3,Q%Mx,Q%My), &
-        O%Ay(3,Q%My,Q%Mx))
+      allocate(psi(Q%Mx,Q%My), x(Q%Mx,Q%My), y(Q%Mx,Q%My), &
+        O%Ax(3,Q%Mx,Q%My), O%Ay(3,Q%My,Q%Mx))
       
       call init_wavefunction(psi, x, y, Q)
       call init_ops(O, Q) 

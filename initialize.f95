@@ -12,8 +12,17 @@ contains
     ! model parameters
     Q%dx = 0.05_dp
     Q%dt = 0.02_dp
-    Q%Lx = 7._dp
-    Q%Ly = 7._dp
+
+    if (Q%V_type == 2) then
+      Q%Lx = 22._dp
+      Q%Ly = 10._dp
+      Q%plot_interval = 5
+    else
+      Q%Lx = 8._dp
+      Q%Ly = 8._dp
+      Q%plot_interval = 40
+    endif
+    
     Q%Mx = floor(Q%Lx/Q%dx)
     Q%My = floor(Q%Ly/Q%dx)
     Q%a = 0.2_dp
@@ -30,7 +39,6 @@ contains
     integer               :: i, j
 
     allocate(r(Q%Mx,Q%My), Hxy(Q%Mx,Q%My))
-    A = 1._dp
     
     ! create grid
     do i = 1,Q%Mx
@@ -40,15 +48,17 @@ contains
       enddo
     enddo
     
-    ! starting position for wavepacket
     if (Q%V_type == 1) then
       r = sqrt((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) 
-    elseif (Q%V_type == 2) then
+      Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
+      A = 1._dp
+    else
+      ! starting position for wavepacket
       r = sqrt((x - Q%Lx/4)**2 + (y - Q%Ly/2)**2) 
+      Hxy = 1._dp 
       A = 2._dp
     endif
 
-    Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
     psi = Hxy*exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
 
     ! normalize wavefunction

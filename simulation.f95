@@ -27,7 +27,7 @@ contains
       ! time integration
       call solve_nxt(psi, V, O, Q)
       
-      if (mod(i,plot_interval) == 0) then
+      if (mod(i,Q%plot_interval) == 0) then
         call plot_wavef(psi, x, y, Q)
       endif
     enddo
@@ -67,7 +67,7 @@ contains
     integer                  :: i, info
     
     allocate(gx(Q%Mx,Q%My))
-    gx = Ax(1,:,:)
+    gx = psi 
 
     !$omp parallel do
     do i = 1,Q%My
@@ -96,7 +96,7 @@ contains
     integer                  :: i, info
     
     allocate(gy(Q%My,Q%Mx))
-    gy = Ay(1,:,:)
+    gy = transpose(psi) 
 
     !$omp parallel do 
     do i = 1,Q%Mx
@@ -121,8 +121,18 @@ contains
     real(dp), intent(in)       :: x(:,:), y(:,:), t
     type(modl_par), intent(in) :: Q
 
-    ! harmonic potential
-    V = (1-0.8_dp*sin(Q%a*t))*(x-Q%Lx/2)**2 + &
-      (1-0.7_dp*sin(Q%a*t))*(y-Q%Ly/2)**2
+    if (Q%V_type == 1) then
+      ! adiabatic harmonic potential
+      V = (1 - 0.8_dp*sin(Q%a*t))*(x - Q%Lx/2)**2 + &
+        (1 - 0.7_dp*sin(Q%a*t))*(y - Q%Ly/2)**2
+
+    elseif (Q%V_type == 2) then
+      ! constant scattering potential: single slit aperture
+      V = 5*(Q%kx**2+Q%ky**2)
+
+      where(Q%Ly*0.40_dp<y .and. y<Q%Ly*0.60_dp) V = 0._dp
+      where(Q%Lx*0.49_dp>x .or. x>Q%Lx*0.51_dp) V = 0._dp
+    endif
+
   end subroutine
 end module

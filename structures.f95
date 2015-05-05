@@ -17,6 +17,7 @@ module structures
     integer :: My
     integer :: N  ! number of time steps
     integer :: V_type
+    integer :: plot_interval
 
     logical :: plot_re
   end type

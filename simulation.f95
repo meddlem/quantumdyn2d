@@ -50,51 +50,55 @@ contains
     
     ! init temp arrays
     Ax_tmp = Ax 
-    Ay_tmp = conjg(Ay)
-    Ay_tmp(2,:,:) = Ay_tmp(2,:,:) - 0.5_dp*i_u*Q%dt*transpose(V)
-
-    ! sweep lattice in x and y direction    
-    call x_sweep(psi, Ax_tmp, Ay_tmp, 1)
-    
-    ! init temp arrays
-    Ax_tmp = conjg(Ax) 
     Ay_tmp = Ay
-    Ay_tmp(2,:,:) = Ay(2,:,:) + 0.5_dp*i_u*Q%dt*transpose(V)
+    Ay_tmp(2,:,:) = Ay_tmp(2,:,:) + 0.5_dp*i_u*Q%dt*transpose(V)
 
-    call x_sweep(psi, Ay_tmp, Ax_tmp, 2)
+    ! first step, solve for intermediate Psi at t=n+1/2
+    call sweep(psi, Ax_tmp, Ay_tmp, 1)
+
+    Ax_tmp = Ax 
+
+    ! second step, solve for Psi at t=n+1
+    call sweep(psi, Ay_tmp, Ax_tmp, 2)
 
     deallocate(Ax_tmp, Ay_tmp)
   end subroutine
 
-  subroutine x_sweep(psi, A, B, sdim)
+  subroutine sweep(psi, A, B, sdim)
     complex(dp), intent(inout) :: psi(:,:), A(:,:,:), B(:,:,:)
     integer, intent(in)        :: sdim
 
     complex(dp), allocatable :: g(:,:)
     integer                  :: i, n, m, info
     
+    n = size(B,2)
+    m = size(A,2)
+    B = conjg(B)
+
     if (sdim == 1) then
-      allocate(g(size(psi,1),size(psi,2)))
+      allocate(g(m,n))
       g = psi 
     else
-      allocate(g(size(psi,2),size(psi,1)))
+      allocate(g(n,m))
       g = transpose(psi)
     endif
 
-    n = size(B,2)
-    m = size(A,2)
-
+    !$omp parallel do 
     do i = 1,n
-      ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', n, n, 1, 1, one, B(:,:,i), 3, &
-        psi(i,:), 1, zero, g(i,:), 1)
+      ! mat-vec multiplication
+      call zgbmv('N', n, n, 1, 1, one, B(:,:,i), 3, psi(i,:), 1, zero, &
+        g(i,:), 1)
     enddo
+    !$omp end parallel do
+    
+    B = conjg(B)
 
+    !$omp parallel do 
     do i = 1,m
-      ! solve resulting tridiagonal system for psi at t=n+1/2
-      call zgtsv(m, 1, A(1,1:m-1,i), A(2,:,i), A(3,1:m-1,i), &
-        g(:,i), m, info)
+      ! solve resulting tridiagonal system
+      call zgtsv(m, 1, A(1,1:m-1,i), A(2,:,i), A(3,1:m-1,i), g(:,i), m, info)
     enddo
+    !$omp end parallel do
     
     if (sdim == 1) then
       psi = g
@@ -105,32 +109,6 @@ contains
     deallocate(g)
   end subroutine
 
-  subroutine y_sweep(psi, Ax, Ay, Q)
-    complex(dp), intent(inout) :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
-    type(modl_par), intent(in) :: Q
-
-    complex(dp), allocatable :: gy(:,:)
-    integer                  :: i, info
-    
-    allocate(gy(Q%Mx,Q%My))
-    gy = psi 
-
-    do i = 1,Q%My
-      ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', Q%Mx, Q%Mx, 1, 1, one, Ax(:,:,i), 3, &
-        psi(:,i), 1, zero, gy(:,i), 1)
-    enddo
-
-    do i = 1,Q%Mx
-      ! solve tridiagonal system for psi at t=n+1
-      call zgtsv(Q%My, 1, Ay(1,1:Q%My-1,i), Ay(2,:,i), Ay(3,1:Q%My-1,i), &
-        gy(i,:), Q%My, info)
-    enddo
-    
-    psi = gy
-    deallocate(gy)
-  end subroutine
-
   pure subroutine potential(V, x, y, t, Q)
     real(dp), intent(inout)    :: V(:,:)
     real(dp), intent(in)       :: x(:,:), y(:,:), t
@@ -139,7 +117,7 @@ contains
     if (Q%V_type == 1) then
       ! adiabatic harmonic potential
       V = (1._dp - 0.5_dp*sin(Q%a*t))*(x - Q%Lx/2)**2 + &
-        (1._dp - 0.4_dp*sin(Q%a*t))*(y - Q%Ly/2)**2
+        (1._dp - 0.7_dp*sin(Q%a*t))*(y - Q%Ly/2)**2
 
     elseif (Q%V_type == 2) then
       ! constant scattering potential: single slit aperture

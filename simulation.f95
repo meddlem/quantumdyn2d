@@ -125,12 +125,12 @@ contains
 
     if (Q%V_type == 1) then
       ! adiabatic harmonic potential
-      V = (x - Q%Lx/2)**2 + (y - Q%Ly/2)**2
+      V = (1._dp - 0.5_dp*sin(Q%a*t))*(x - Q%Lx/2)**2 + &
+        (1._dp - 0.4_dp*sin(Q%a*t))*(y - Q%Ly/2)**2
 
     elseif (Q%V_type == 2) then
       ! constant scattering potential: single slit aperture
-      !V = 10*(Q%kx**2+Q%ky**2)
-      V = 0._dp
+      V = 10*(Q%kx**2+Q%ky**2)
 
       where(Q%Ly*0.40_dp<y .and. y<Q%Ly*0.60_dp) V = 0._dp
       where(Q%Lx*0.49_dp>x .or. x>Q%Lx*0.51_dp) V = 0._dp

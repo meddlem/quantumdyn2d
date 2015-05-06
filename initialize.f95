@@ -20,7 +20,7 @@ contains
     else
       Q%Lx = 8._dp
       Q%Ly = 8._dp
-      Q%plot_interval = 1
+      Q%plot_interval = 40
     endif
     
     Q%Mx = floor(Q%Lx/Q%dx)
@@ -50,7 +50,7 @@ contains
     
     if (Q%V_type == 1) then
       r = sqrt((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) 
-      Hxy = 1._dp !(x - Q%Lx/2)*(y - Q%Ly/2)
+      Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
       !psi = sin(pi*x/Q%Lx)*sin(2*pi*y/Q%Ly) 
       A = 1._dp
       psi = Hxy*exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
@@ -58,8 +58,8 @@ contains
       ! starting position for wavepacket
       r = sqrt((x - Q%Lx/4)**2 + (y - Q%Ly/2)**2) 
       Hxy = 1._dp 
-      psi = Hxy*exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
       A = 2._dp
+      psi = Hxy*exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
     endif
 
     ! calc and normalize wavefunction

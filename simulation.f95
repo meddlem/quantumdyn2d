@@ -14,15 +14,17 @@ contains
     complex(dp), intent(in)    :: Ax(:,:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
 
-    real(dp), allocatable :: V(:,:)
+    real(dp), allocatable :: V(:,:), V1(:,:), V2(:,:)
     integer               :: i
 
-    allocate(V(Q%Mx,Q%My))
+    allocate(V(Q%Mx,Q%My), V1(Q%Mx,Q%My), V2(Q%Mx,Q%My))
     call animate_plot(Q)
 
     do i = 1,Q%N
       ! calculate potential
-      call potential(V, x, y, i*Q%dt, Q) 
+      call potential(V1, x, y, i*Q%dt, Q) 
+      call potential(V2, x, y, (i+1)*Q%dt, Q) 
+      V = 0.5_dp*(V1 + V2)
 
       ! time integration
       call solve_nxt(psi, V, Ax, Ay, Q)
@@ -33,7 +35,7 @@ contains
     enddo
     
     call close_plot()
-    deallocate(V)
+    deallocate(V, V1, V2)
   end subroutine
 
   subroutine solve_nxt(psi, V, Ax, Ay, Q)
@@ -48,19 +50,24 @@ contains
     
     ! init temp arrays
     Ax_tmp = Ax 
-    Ay_tmp = Ay
-    Ax_tmp(2,:,:) = Ax_tmp(2,:,:) + 0.25_dp*i_u*Q%dt*V
-    Ay_tmp(2,:,:) = Ay_tmp(2,:,:) + 0.25_dp*i_u*Q%dt*transpose(V)
+    Ay_tmp = conjg(Ay)
+    Ay_tmp(2,:,:) = Ay_tmp(2,:,:) - 0.5_dp*i_u*Q%dt*transpose(V)
 
     ! sweep lattice in x and y direction    
-    call x_sweep(psi, Ax_tmp, Q)
-    call y_sweep(psi, Ay_tmp, Q)
+    call x_sweep(psi, Ax_tmp, Ay_tmp, Q)
+    
+    ! init temp arrays
+    Ax_tmp = conjg(Ax) 
+    Ay_tmp = Ay
+    Ay_tmp(2,:,:) = Ay(2,:,:) + 0.5_dp*i_u*Q%dt*transpose(V)
+
+    call y_sweep(psi, Ax_tmp, Ay_tmp, Q)
 
     deallocate(Ax_tmp, Ay_tmp)
   end subroutine
 
-  subroutine x_sweep(psi, Ax, Q)
-    complex(dp), intent(inout) :: psi(:,:), Ax(:,:,:)
+  subroutine x_sweep(psi, Ax, Ay, Q)
+    complex(dp), intent(inout) :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
 
     complex(dp), allocatable :: gx(:,:)
@@ -69,45 +76,45 @@ contains
     allocate(gx(Q%Mx,Q%My))
     gx = psi 
 
-    !$omp parallel do
-    do i = 1,Q%My
+    do i = 1,Q%Mx
       ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', Q%Mx, Q%Mx, 1, 1, one, conjg(Ax(:,:,i)), 3, &
-        psi(:,i), 1, zero, gx(:,i), 1)
+      call zgbmv('N', Q%My, Q%My, 1, 1, one, Ay(:,:,i), 3, &
+        psi(i,:), 1, zero, gx(i,:), 1)
+    enddo
 
+    do i = 1,Q%My
       ! solve resulting tridiagonal system for psi at t=n+1/2
       call zgtsv(Q%Mx, 1, Ax(1,1:Q%Mx-1,i), Ax(2,:,i), Ax(3,1:Q%Mx-1,i), &
         gx(:,i), Q%Mx, info)
     enddo
-    !$omp end parallel do
     
     psi = gx
     deallocate(gx)
   end subroutine
 
-  subroutine y_sweep(psi, Ay, Q)
-    complex(dp), intent(inout) :: psi(:,:), Ay(:,:,:)
+  subroutine y_sweep(psi, Ax, Ay, Q)
+    complex(dp), intent(inout) :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
 
     complex(dp), allocatable :: gy(:,:)
     integer                  :: i, info
     
-    allocate(gy(Q%My,Q%Mx))
-    gy = transpose(psi) 
+    allocate(gy(Q%Mx,Q%My))
+    gy = psi 
 
-    !$omp parallel do 
-    do i = 1,Q%Mx
+    do i = 1,Q%My
       ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', Q%My, Q%My, 1, 1, one, conjg(Ay(:,:,i)), 3, &
-        psi(i,:), 1, zero, gy(:,i), 1)
+      call zgbmv('N', Q%Mx, Q%Mx, 1, 1, one, Ax(:,:,i), 3, &
+        psi(:,i), 1, zero, gy(:,i), 1)
+    enddo
 
+    do i = 1,Q%Mx
       ! solve tridiagonal system for psi at t=n+1
       call zgtsv(Q%My, 1, Ay(1,1:Q%My-1,i), Ay(2,:,i), Ay(3,1:Q%My-1,i), &
-        gy(:,i), Q%My, info)
+        gy(i,:), Q%My, info)
     enddo
-    !$omp end parallel do
     
-    psi = transpose(gy)
+    psi = gy
     deallocate(gy)
   end subroutine
 
@@ -118,12 +125,12 @@ contains
 
     if (Q%V_type == 1) then
       ! adiabatic harmonic potential
-      V = (1 - 0.8_dp*sin(Q%a*t))*(x - Q%Lx/2)**2 + &
-        (1 - 0.7_dp*sin(Q%a*t))*(y - Q%Ly/2)**2
+      V = (x - Q%Lx/2)**2 + (y - Q%Ly/2)**2
 
     elseif (Q%V_type == 2) then
       ! constant scattering potential: single slit aperture
-      V = 5*(Q%kx**2+Q%ky**2)
+      !V = 10*(Q%kx**2+Q%ky**2)
+      V = 0._dp
 
       where(Q%Ly*0.40_dp<y .and. y<Q%Ly*0.60_dp) V = 0._dp
       where(Q%Lx*0.49_dp>x .or. x>Q%Lx*0.51_dp) V = 0._dp

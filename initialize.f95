@@ -53,16 +53,15 @@ contains
       Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
       !psi = sin(pi*x/Q%Lx)*sin(2*pi*y/Q%Ly) 
       A = 1._dp
-      psi = Hxy*exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
     else
       ! starting position for wavepacket
       r = sqrt((x - Q%Lx/4)**2 + (y - Q%Ly/2)**2) 
       Hxy = 1._dp 
       A = 2._dp
-      psi = Hxy*exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
     endif
 
     ! calc and normalize wavefunction
+    psi = Hxy*exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
     psi = psi/sqrt(sum(abs(psi)**2*Q%dx**2))
 
     deallocate(r, Hxy)
@@ -72,14 +71,16 @@ contains
     complex(dp), intent(inout) :: Ax(:,:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
 
+    integer :: i
+
     ! init ADI matrix operators, x-dir, band storage fmt
     Ax(1,:,:) = -0.5_dp*i_u*Q%dt/Q%dx**2
     Ax(2,:,:) = one + i_u*Q%dt/Q%dx**2
     Ax(3,:,:) = Ax(1,:,:)
     
     ! init ADI matrix operators, y-dir, band storage fmt
-    Ay(1,:,:) = -0.5_dp*i_u*Q%dt/Q%dx**2
-    Ay(2,:,:) = one + i_u*Q%dt/Q%dx**2
-    Ay(3,:,:) = Ay(1,:,:)
+    do i = 1,3
+      Ay(i,:,:) = transpose(Ax(i,:,:))
+    enddo
   end subroutine
 end module 

@@ -54,42 +54,55 @@ contains
     Ay_tmp(2,:,:) = Ay_tmp(2,:,:) - 0.5_dp*i_u*Q%dt*transpose(V)
 
     ! sweep lattice in x and y direction    
-    call x_sweep(psi, Ax_tmp, Ay_tmp, Q)
+    call x_sweep(psi, Ax_tmp, Ay_tmp, 1)
     
     ! init temp arrays
     Ax_tmp = conjg(Ax) 
     Ay_tmp = Ay
     Ay_tmp(2,:,:) = Ay(2,:,:) + 0.5_dp*i_u*Q%dt*transpose(V)
 
-    call y_sweep(psi, Ax_tmp, Ay_tmp, Q)
+    call x_sweep(psi, Ay_tmp, Ax_tmp, 2)
 
     deallocate(Ax_tmp, Ay_tmp)
   end subroutine
 
-  subroutine x_sweep(psi, Ax, Ay, Q)
-    complex(dp), intent(inout) :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
-    type(modl_par), intent(in) :: Q
+  subroutine x_sweep(psi, A, B, sdim)
+    complex(dp), intent(inout) :: psi(:,:), A(:,:,:), B(:,:,:)
+    integer, intent(in)        :: sdim
 
-    complex(dp), allocatable :: gx(:,:)
-    integer                  :: i, info
+    complex(dp), allocatable :: g(:,:)
+    integer                  :: i, n, m, info
     
-    allocate(gx(Q%Mx,Q%My))
-    gx = psi 
+    if (sdim == 1) then
+      allocate(g(size(psi,1),size(psi,2)))
+      g = psi 
+    else
+      allocate(g(size(psi,2),size(psi,1)))
+      g = transpose(psi)
+    endif
 
-    do i = 1,Q%Mx
+    n = size(B,2)
+    m = size(A,2)
+
+    do i = 1,n
       ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', Q%My, Q%My, 1, 1, one, Ay(:,:,i), 3, &
-        psi(i,:), 1, zero, gx(i,:), 1)
+      call zgbmv('N', n, n, 1, 1, one, B(:,:,i), 3, &
+        psi(i,:), 1, zero, g(i,:), 1)
     enddo
 
-    do i = 1,Q%My
+    do i = 1,m
       ! solve resulting tridiagonal system for psi at t=n+1/2
-      call zgtsv(Q%Mx, 1, Ax(1,1:Q%Mx-1,i), Ax(2,:,i), Ax(3,1:Q%Mx-1,i), &
-        gx(:,i), Q%Mx, info)
+      call zgtsv(m, 1, A(1,1:m-1,i), A(2,:,i), A(3,1:m-1,i), &
+        g(:,i), m, info)
     enddo
     
-    psi = gx
-    deallocate(gx)
+    if (sdim == 1) then
+      psi = g
+    else
+      psi = transpose(g)
+    endif
+
+    deallocate(g)
   end subroutine
 
   subroutine y_sweep(psi, Ax, Ay, Q)

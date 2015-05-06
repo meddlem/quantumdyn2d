@@ -56,6 +56,7 @@ contains
     ! first step, solve for intermediate Psi at t=n+1/2
     call sweep(psi, Ax_tmp, Ay_tmp, 1)
 
+    ! reset Ax matrix
     Ax_tmp = Ax 
 
     ! second step, solve for Psi at t=n+1
@@ -73,26 +74,20 @@ contains
     
     n = size(B,2)
     m = size(A,2)
-    B = conjg(B)
 
+    allocate(g(m,n))
     if (sdim == 1) then
-      allocate(g(m,n))
       g = psi 
     else
-      allocate(g(n,m))
       g = transpose(psi)
     endif
 
-    !$omp parallel do 
     do i = 1,n
       ! mat-vec multiplication
-      call zgbmv('N', n, n, 1, 1, one, B(:,:,i), 3, psi(i,:), 1, zero, &
+      call zgbmv('N', n, n, 1, 1, one, conjg(B(:,:,i)), 3, psi(i,:), 1, zero, &
         g(i,:), 1)
     enddo
-    !$omp end parallel do
     
-    B = conjg(B)
-
     !$omp parallel do 
     do i = 1,m
       ! solve resulting tridiagonal system
@@ -105,7 +100,6 @@ contains
     else
       psi = transpose(g)
     endif
-
     deallocate(g)
   end subroutine
 
@@ -120,7 +114,7 @@ contains
         (1._dp - 0.7_dp*sin(Q%a*t))*(y - Q%Ly/2)**2
 
     elseif (Q%V_type == 2) then
-      ! constant scattering potential: single slit aperture
+      ! single slit aperture
       V = 10*(Q%kx**2+Q%ky**2)
 
       where(Q%Ly*0.40_dp<y .and. y<Q%Ly*0.60_dp) V = 0._dp

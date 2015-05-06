@@ -60,8 +60,10 @@ contains
       A = 2._dp
     endif
 
-    ! calc and normalize wavefunction
+    ! calc wavefunction
     psi = Hxy*exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
+
+    ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*Q%dx**2))
 
     deallocate(r, Hxy)

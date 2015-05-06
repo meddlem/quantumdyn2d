@@ -53,18 +53,18 @@ contains
     Ay_tmp(2,:,:) = Ay_tmp(2,:,:) + 0.5_dp*i_u*Q%dt*transpose(V)
 
     ! first step, solve for intermediate Psi at t=n+1/2
-    call i_sweep(psi, Ax_tmp, Ay_tmp, Q)
+    call a_sweep(psi, Ax_tmp, Ay_tmp, Q)
 
     ! reset Ax matrix
     Ax_tmp = Ax 
 
     ! second step, solve for Psi at t=n+1
-    call f_sweep(psi, Ax_tmp, Ay_tmp, Q)
+    call b_sweep(psi, Ax_tmp, Ay_tmp, Q)
 
     deallocate(Ax_tmp, Ay_tmp)
   end subroutine
 
-  subroutine i_sweep(psi, Ax, Ay, Q)
+  subroutine a_sweep(psi, Ax, Ay, Q)
     complex(dp), intent(inout) :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
 
@@ -92,7 +92,7 @@ contains
     deallocate(g)
   end subroutine
 
-  subroutine f_sweep(psi, Ax, Ay, Q)
+  subroutine b_sweep(psi, Ax, Ay, Q)
     complex(dp), intent(inout) :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
 

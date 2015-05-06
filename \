@@ -53,70 +53,54 @@ contains
     Ay_tmp(2,:,:) = Ay_tmp(2,:,:) + 0.5_dp*i_u*Q%dt*transpose(V)
 
     ! first step, solve for intermediate Psi at t=n+1/2
-    call i_sweep(psi, Ax_tmp, Ay_tmp, Q)
+    call sweep(psi, Ax_tmp, Ay_tmp, 1)
 
     ! reset Ax matrix
     Ax_tmp = Ax 
 
     ! second step, solve for Psi at t=n+1
-    call f_sweep(psi, Ax_tmp, Ay_tmp, Q)
+    call sweep(psi, Ay_tmp, Ax_tmp, 2)
 
     deallocate(Ax_tmp, Ay_tmp)
   end subroutine
 
-  subroutine i_sweep(psi, Ax, Ay, Q)
-    complex(dp), intent(inout) :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
-    type(modl_par), intent(in) :: Q
+  subroutine sweep(psi, A, B, sdim)
+    complex(dp), intent(inout) :: psi(:,:), A(:,:,:), B(:,:,:)
+    integer, intent(in)        :: sdim
 
     complex(dp), allocatable :: g(:,:)
-    integer                  :: i, info
+    integer                  :: i, n, m, info
     
-    allocate(g(Q%Mx,Q%My))
-    g = psi 
+    n = size(B,2)
+    m = size(A,2)
+    allocate(g(m,n))
 
-    do i = 1,Q%Mx
-      ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', Q%My, Q%My, 1, 1, one, conjg(Ay(:,:,i)), 3, &
-        psi(i,:), 1, zero, g(i,:), 1)
+    ! transpose wavefunction if Y operator must be applied
+    if (sdim == 1) then
+      g = psi 
+    else
+      g = transpose(psi)
+    endif
+
+    do i = 1,n
+      ! mat-vec multiplication
+      call zgbmv('N', n, n, 1, 1, one, conjg(B(:,:,i)), 3, psi(i,:), 1, zero, &
+        g(i,:), 1)
     enddo
-
-    !$omp parallel do
-    do i = 1,Q%My
-      ! solve resulting tridiagonal system for psi at t=n+1/2
-      call zgtsv(Q%Mx, 1, Ax(1,1:Q%Mx-1,i), Ax(2,:,i), Ax(3,1:Q%Mx-1,i), &
-        g(:,i), Q%Mx, info)
+    
+    !$omp parallel do 
+    do i = 1,m
+      ! solve resulting tridiagonal system for g 
+      call zgtsv(m, 1, A(1,1:m-1,i), A(2,:,i), A(3,1:m-1,i), g(:,i), m, info)
     enddo
     !$omp end parallel do
     
-    psi = g
-    deallocate(g)
-  end subroutine
+    if (sdim == 1) then
+      psi = g
+    else
+      psi = transpose(g)
+    endif
 
-  subroutine f_sweep(psi, Ax, Ay, Q)
-    complex(dp), intent(inout) :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
-    type(modl_par), intent(in) :: Q
-
-    complex(dp), allocatable :: g(:,:)
-    integer                  :: i, info
-    
-    allocate(g(Q%Mx,Q%My))
-    g = psi 
-
-    do i = 1,Q%My
-      ! explicit part of calculation, mat-vec multiplication
-      call zgbmv('N', Q%Mx, Q%Mx, 1, 1, one, conjg(Ax(:,:,i)), 3, &
-        psi(:,i), 1, zero, g(:,i), 1)
-    enddo
-
-    !$omp parallel do
-    do i = 1,Q%Mx
-      ! solve tridiagonal system for psi at t=n+1
-      call zgtsv(Q%My, 1, Ay(1,1:Q%My-1,i), Ay(2,:,i), Ay(3,1:Q%My-1,i), &
-        g(i,:), Q%My, info)
-    enddo
-    !$omp end parallel do
-    
-    psi = g
     deallocate(g)
   end subroutine
 

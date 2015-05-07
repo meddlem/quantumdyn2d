@@ -20,6 +20,7 @@ contains
     call animate_plot(Q)
     
     do i = 1,Q%N
+      ! calculate potential using trapezoidal rule
       call potential(V1, x, i*Q%dt, Q)
       call potential(V2, x, (i+1)*Q%dt, Q)
       V = 0.5_dp*(V1 + V2)
@@ -51,10 +52,10 @@ contains
     A_tmp = A
     A_tmp(2,:) = A_tmp(2,:) + 0.5_dp*i_u*Q%dt*V
 
-    ! explicit part of calculation, mat-vec multiplication
+    ! explicit part of calculation, mat-vec multiplication, using BLAS routine
     call zgbmv('N', Q%M, Q%M, 1, 1, one, conjg(A_tmp), 3, psi, 1, zero, g, 1)
 
-    ! solve for wavefunction at t=n+1
+    ! solve for wavefunction at t=n+1, using LAPACK routine
     call zgtsv(Q%M, 1, A_tmp(1,1:Q%M-1), A_tmp(2,:), A_tmp(3,1:Q%M-1), g, &
       Q%M, info)
 

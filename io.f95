@@ -9,9 +9,12 @@ contains
   subroutine user_in(Q)
     type(modl_par), intent(inout) :: Q
   
-    write(*,'(/,A,/)') '************ Input *************' 
-    write(*,'(A)',advance='no') "k = " 
-    read(*,*) Q%k
+    if (Q%V_type == 2) then
+      write(*,'(/,A,/)') '************ Input *************' 
+      write(*,'(A)',advance='no') "k = " 
+      read(*,*) Q%k
+    endif
+
     write(*,'(A)') "Running simulation..."
   end subroutine
 

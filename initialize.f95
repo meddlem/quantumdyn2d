@@ -9,14 +9,23 @@ contains
   subroutine init_param(Q)
     type(modl_par), intent(inout) :: Q
 
-    ! simulation parameters
+    ! set model parameters
     Q%dx = 0.01_dp
     Q%dt = 0.025_dp
-    Q%L = 12._dp
-    Q%M = floor(Q%L/Q%dx)
-    Q%plot_interval = 100
+    
+    if (Q%V_type == 1) then
+      Q%L = 12._dp
+      Q%M = floor(Q%L/Q%dx)
+      Q%plot_interval = 9
+      Q%n = 20000
+    elseif (Q%V_type == 2) then
+      Q%L = 50._dp
+      Q%M = floor(Q%L/Q%dx)
+      Q%plot_interval = 9
+      Q%n = 5000
+    endif
+    
     Q%tau = 400._dp
-    Q%n = 20000
   end subroutine
 
   subroutine init_wavef(psi, x, Q)
@@ -24,14 +33,27 @@ contains
     real(dp), intent(inout)    :: x(:)
     type(modl_par), intent(in) :: Q 
 
-    integer :: i
+    real(dp), allocatable    :: r(:), Hx(:)
+    real(dp)                 :: A
+    integer                  :: i
     
+    allocate(r(Q%M), Hx(Q%M))
+   
     do i = 1,Q%M
       x(i) = i*Q%dx
     enddo
 
-    ! gaussian wavepackets
-    psi = exp(-0.5_dp*(x-Q%L/2)**2)*exp(cmplx(0._dp,Q%k*x,dp))
+    if (Q%V_type == 1) then
+      r = abs(x - Q%L/2)
+      Hx = (x - Q%L/2)
+      A = 1._dp
+    elseif (Q%V_type == 2) then
+      r = abs(x - Q%L/4)
+      Hx = 1._dp
+      A = 1._dp
+    endif
+
+    psi = Hx*exp(-0.5_dp*A*r**2)*exp(i_u*Q%k*x)
 
     ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*Q%dx))

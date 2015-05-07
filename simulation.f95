@@ -69,11 +69,17 @@ contains
     real(dp), intent(in)       :: x(:), t
     type(modl_par), intent(in) :: Q
 
-    ! adiabatic change harmonic potential -> ISQW
-    if (t < Q%tau) then
-      V = (1._dp - t/Q%tau)**2*(x-Q%L/2)**2 
-    else
+    if (Q%V_type == 1) then
+      ! adiabatic change harmonic potential -> ISQW
+      if (t < Q%tau) then
+        V = (1._dp - t/Q%tau)**2*(x-Q%L/2)**2 
+      else
+        V = 0._dp
+      endif
+    elseif (Q%V_type == 2) then
+      ! fixed height tunnel barrier
       V = 0._dp
+      where(abs(x-Q%L/2) < Q%L/20) V = 1._dp
     endif
   end subroutine
 end module

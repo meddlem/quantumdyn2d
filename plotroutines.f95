@@ -24,12 +24,12 @@ contains
       write(10,*) 'set pm3d'
       write(10,*) 'set size ratio',Q%Ly/Q%Lx
       write(10,*) 'set hidden3d'
-      write(10,*) 'set xrange [0:',Q%Lx,']'
+      write(10,*) 'set xrange [',Q%Lx/2,':',Q%Lx,']'
       write(10,*) 'set yrange [0:',Q%Ly,']'
       write(10,*) 'set xlabel "x"'
       write(10,*) 'set ylabel "y" norotate'
       if (.not. Q%plot_re) then
-        write(10,*) 'set cbrange [0:0.3]'
+        !write(10,*) 'set cbrange [0:0.3]'
         write(10,*) 'set cblabel "density"'
       elseif (Q%plot_re) then
         write(10,*) 'set cbrange [-0.2:0.2]'

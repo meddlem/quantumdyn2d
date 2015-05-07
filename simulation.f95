@@ -132,11 +132,12 @@ contains
       ! single slit aperture
       
       ! set barrier height
-      V = 3_dp*(Q%kx**2 + Q%ky**2)
+      V = 20_dp*(Q%kx**2 + Q%ky**2)
       
       ! set potential to zero outside of barrier
-      where(Q%Ly*0.40_dp<y .and. y<Q%Ly*0.60_dp) V = 0._dp
-      where(Q%Lx*0.49_dp>x .or. x>Q%Lx*0.51_dp) V = 0._dp
+      where(abs(x-Q%Bx) > Q%Wx) V = 0._dp
+      where(abs(y - (Q%By + 2*Q%Wy)) < Q%Wy) V = 0._dp 
+      where(abs(y - (Q%By - 2*Q%Wy)) < Q%Wy) V = 0._dp
     endif
   end subroutine
 end module

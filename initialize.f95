@@ -17,6 +17,10 @@ contains
       Q%Lx = 22._dp
       Q%Ly = 10._dp
       Q%plot_interval = 5
+      Q%Bx = Q%Lx/2
+      Q%By = Q%Ly/2
+      Q%Wx = Q%Lx*0.005_dp
+      Q%Wy = Q%Ly*0.05_dp
     else
       Q%Lx = 8._dp
       Q%Ly = 8._dp

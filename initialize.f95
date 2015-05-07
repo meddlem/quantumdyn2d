@@ -1,68 +1,53 @@
 module initialize
   use constants
+  use structures 
   implicit none
   private
-  public :: init_param, init_wavef, init_V, init_ops
+  public :: init_param, init_wavef, init_ops
 
 contains
-  subroutine init_param(dx,dt,L,M,n)
-    real(dp), intent(out) :: dx, dt, L
-    integer, intent(out)  :: M, n
+  subroutine init_param(Q)
+    type(modl_par), intent(inout) :: Q
 
     ! simulation parameters
-    dx = 0.01_dp
-    dt = 0.025_dp
-    L = 60._dp
-    M = floor(L/dx)
-    n = 5000
+    Q%dx = 0.01_dp
+    Q%dt = 0.025_dp
+    Q%L = 12._dp
+    Q%M = floor(Q%L/Q%dx)
+    Q%plot_interval = 100
+    Q%tau = 400._dp
+    Q%n = 20000
   end subroutine
 
-  subroutine init_wavef(psi,x,dx,L,k,M)
+  subroutine init_wavef(psi, x, Q)
     complex(dp), intent(inout) :: psi(:) 
     real(dp), intent(inout)    :: x(:)
-    real(dp), intent(in)       :: dx, L, k
-    integer, intent(in)        :: M
+    type(modl_par), intent(in) :: Q 
+
     integer :: i
     
-    do i = 1,M
-      x(i) = i*dx
+    do i = 1,Q%M
+      x(i) = i*Q%dx
     enddo
 
-    ! isq well
-    ! psi_0 = sin(2*pi*x/L)*exp(cmplx(0._dp,k*x,dp))
-    
     ! gaussian wavepackets
-    psi = exp(-0.5_dp*(x-L/2)**2)*exp(cmplx(0._dp,k*x,dp)) !+ &
-    ! exp(-0.5_dp*(x-2*L/3)**2)*exp(cmplx(0._dp,-k*x,dp))
+    psi = exp(-0.5_dp*(x-Q%L/2)**2)*exp(cmplx(0._dp,Q%k*x,dp))
 
     ! normalize wavefunction
-    psi = psi/sqrt(sum(abs(psi)**2*dx))
+    psi = psi/sqrt(sum(abs(psi)**2*Q%dx))
   end subroutine
 
-  subroutine init_V(V,x,L)
-    real(dp), intent(in) :: x(:), L
-    real(dp), intent(inout) :: V(:)
-    
-    ! block/scattering potential
-    !V = 0._dp
-    !where(28._dp<x .and. x<32._dp) V = 1._dp
-    
-    ! harmonic potential
-    V = 1._dp*(x-L/2)**2
-  end subroutine
-    
-  subroutine init_ops(Ax,V,dt,dx,M)
-    complex(dp), intent(inout) :: Ax(:,:)
-    real(dp), intent(in)       :: V(:), dt, dx
-    integer, intent(in)        :: M
+  subroutine init_ops(A, Q)
+    complex(dp), intent(inout) :: A(:,:)
+    type(modl_par), intent(in) :: Q
 
-    integer :: i
+    real(dp) :: r
 
-    ! construct matrix operators in band storage fmt
-    do i = 1,M
-      Ax(1,i) = cmplx(0._dp, -0.5_dp*dt/dx**2, dp)
-      Ax(2,i) = cmplx(1._dp, 0.5_dp*dt*(2._dp/dx**2 + V(i)), dp)
-      Ax(3,i) = cmplx(0._dp, -0.5_dp*dt/dx**2, dp)
-    enddo
+    r = Q%dt/Q%dx**2
+
+    ! initialize matrix operator in band storage fmt
+    A(1,:) = -0.5_dp*i_u*r
+    A(2,:) = one + i_u*r
+    A(3,:) = -0.5_dp*i_u*r
   end subroutine
 end module 

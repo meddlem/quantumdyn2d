@@ -1,33 +1,32 @@
 program main
   use constants
+  use structures
   use initialize
   use simulation
-  use plotroutines
   use io
   implicit none
 
-  complex(dp), allocatable :: psi(:), Ax(:,:)
-  real(dp), allocatable    :: x(:), V(:)
-  real(dp) :: k, dx, dt, L
-  integer  :: M, n
+  type(modl_par) :: Q
 
-  ! init parameters
-  call init_param(dx,dt,L,M,n)
+  call get_usr_args(Q)
+  call user_in(Q)
+  call init_param(Q)
+  call run_sim(Q)
 
-  ! allocate arrays
-  allocate(psi(M),x(M),V(M),Ax(3,M))
-  
-  ! init simulation
-  call user_in(k)
-  call init_wavef(psi,x,dx,L,k,M)
-  call init_V(V,x,L)
-  call init_ops(Ax,V,dt,dx,M)
-  call animate_plot(L)
+  contains
+    subroutine run_sim(Q)
+      type(modl_par), intent(in) :: Q
 
-  ! time integration
-  call run_sim(psi,x,V,n,M,Ax)
+      complex(dp), allocatable :: psi(:), A(:,:)
+      real(dp), allocatable    :: x(:) 
+      
+      allocate(psi(Q%M), x(Q%M), A(3,Q%M))
+      call init_wavef(psi, x, Q)
+      call init_ops(A, Q)
 
-  ! close off 
-  call close_plot()
-  deallocate(psi,x,V,Ax)
+      ! time integration
+      call time_evo(psi, x, A, Q)
+
+      deallocate(psi, x, A)
+    end subroutine
 end program

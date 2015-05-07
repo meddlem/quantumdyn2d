@@ -25,7 +25,7 @@ contains
     
     Q%Mx = floor(Q%Lx/Q%dx)
     Q%My = floor(Q%Ly/Q%dx)
-    Q%tau = 0.01_dp
+    Q%tau = 100._dp
     Q%N = 10000
   end subroutine
   

@@ -123,8 +123,8 @@ contains
 
     if (Q%V_type == 1) then
       ! adiabatic harmonic potential -> ISQW
-      if (t < 1._dp/Q%tau) then
-        V = (1._dp - Q%tau*t)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)
+      if (t < Q%tau) then
+        V = (1._dp - t/Q%tau)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)
       else
         V = 0._dp
       endif

@@ -24,6 +24,7 @@ contains
       call potential(V2, x, (i+1)*Q%dt, Q)
       V = 0.5_dp*(V1 + V2)
 
+      ! time integration 
       call solve_nxt(psi, V, A, Q)
 
       if (mod(i,Q%plot_interval) == 0) then
@@ -48,13 +49,14 @@ contains
     
     ! init temp arrays
     A_tmp = A
-    A_tmp(2,:) = A_tmp(2,:) + cmplx(0._dp, 0.5_dp*Q%dt*V, dp)
+    A_tmp(2,:) = A_tmp(2,:) + 0.5_dp*i_u*Q%dt*V
 
     ! explicit part of calculation, mat-vec multiplication
     call zgbmv('N', Q%M, Q%M, 1, 1, one, conjg(A_tmp), 3, psi, 1, zero, g, 1)
 
     ! solve for wavefunction at t=n+1
-    call zgtsv(Q%M, 1, A_tmp(1,1:Q%M-1), A_tmp(2,:), A_tmp(3,1:Q%M-1), g, Q%M, info)
+    call zgtsv(Q%M, 1, A_tmp(1,1:Q%M-1), A_tmp(2,:), A_tmp(3,1:Q%M-1), g, &
+      Q%M, info)
 
     ! collect wavefunction at t=n+1
     psi = g

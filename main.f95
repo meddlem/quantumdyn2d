@@ -20,10 +20,7 @@ program main
       complex(dp), allocatable :: psi(:), A(:,:)
       real(dp), allocatable    :: x(:) 
       
-      ! allocate arrays
       allocate(psi(Q%M), x(Q%M), A(3,Q%M))
-      
-      ! init simulation
       call init_wavef(psi, x, Q)
       call init_ops(A, Q)
 

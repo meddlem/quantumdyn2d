@@ -31,7 +31,7 @@ contains
     ! check command line arguments
     do i=1,iargc()
       call getarg(i,arg)
-      if ((trim(arg) == '--Scatter') .or. (trim(arg) == '-s')) then
+      if (trim(arg) == '-t') then
         Q%V_type = 2 ! scattering potential
       endif
       if ((trim(arg) == '--PlotRe') .or. (trim(arg) == '-r')) then

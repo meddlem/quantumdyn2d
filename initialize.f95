@@ -51,10 +51,8 @@ contains
     if (Q%V_type == 1) then
       r = sqrt((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) 
       Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
-      !psi = sin(pi*x/Q%Lx)*sin(2*pi*y/Q%Ly) 
       A = 1._dp
     else
-      ! starting position for wavepacket
       r = sqrt((x - Q%Lx/4)**2 + (y - Q%Ly/2)**2) 
       Hxy = 1._dp 
       A = 2._dp

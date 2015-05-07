@@ -21,7 +21,7 @@ contains
     call animate_plot(Q)
 
     do i = 1,Q%N
-      ! calculate potential
+      ! calculate potential using trapezoidal rule
       call potential(V1, x, y, i*Q%dt, Q) 
       call potential(V2, x, y, (i+1)*Q%dt, Q) 
       V = 0.5_dp*(V1 + V2)
@@ -130,8 +130,11 @@ contains
       endif
     elseif (Q%V_type == 2) then
       ! single slit aperture
+      
+      ! set barrier height
       V = 10*(Q%kx**2 + Q%ky**2)
-
+      
+      ! set potential to zero outside of barrier
       where(Q%Ly*0.40_dp<y .and. y<Q%Ly*0.60_dp) V = 0._dp
       where(Q%Lx*0.49_dp>x .or. x>Q%Lx*0.51_dp) V = 0._dp
     endif

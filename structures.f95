@@ -1,17 +1,20 @@
 module structures
   use constants
   implicit none
-
+  
   type modl_par 
     ! data type that contains all model parameters 
     
-    real(dp) :: k
-    real(dp) :: L ! lattice length 
+    real(dp) :: kx 
+    real(dp) :: ky
+    real(dp) :: Lx ! lattice length in x-dir
+    real(dp) :: Ly ! lattice length in y-dir
     real(dp) :: dx 
     real(dp) :: dt
-    real(dp) :: tau  ! time constant potential
+    real(dp) :: tau  ! time scale adiabatic change
 
-    integer :: M ! lattice points in x-dir
+    integer :: Mx ! lattice size in x-dir
+    integer :: My
     integer :: N  ! number of time steps/iterations
     integer :: V_type
     integer :: plot_interval

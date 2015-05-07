@@ -1,86 +1,142 @@
 module simulation
   use constants
-  use structures
+  use structures 
   use plotroutines
+  use omp_lib
   implicit none
   private
   public :: time_evo
 
 contains
-  subroutine time_evo(psi, x, A, Q)
-    complex(dp), intent(inout) :: psi(:)
-    complex(dp), intent(in)    :: A(:,:)
-    real(dp), intent(in)       :: x(:) 
+  subroutine time_evo(psi, x, y, Ax, Ay, Q)
+    complex(dp), intent(inout) :: psi(:,:)
+    real(dp), intent(in)       :: x(:,:), y(:,:)
+    complex(dp), intent(in)    :: Ax(:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
 
-    real(dp), allocatable :: V(:), V1(:), V2(:)
-    integer  :: i
+    real(dp), allocatable :: V(:,:), V1(:,:), V2(:,:)
+    integer               :: i
 
-    allocate(V(Q%M), V1(Q%M), V2(Q%M))
+    allocate(V(Q%Mx,Q%My), V1(Q%Mx,Q%My), V2(Q%Mx,Q%My))
     call animate_plot(Q)
-    
+
     do i = 1,Q%N
       ! calculate potential using trapezoidal rule
-      call potential(V1, x, i*Q%dt, Q)
-      call potential(V2, x, (i+1)*Q%dt, Q)
+      call potential(V1, x, y, i*Q%dt, Q) 
+      call potential(V2, x, y, (i+1)*Q%dt, Q) 
       V = 0.5_dp*(V1 + V2)
 
-      ! time integration 
-      call solve_nxt(psi, V, A, Q)
-
+      ! time integration
+      call solve_nxt(psi, V, Ax, Ay, Q)
+      
       if (mod(i,Q%plot_interval) == 0) then
-        call plot_wavef(psi, x, V, Q)
+        call plot_wavef(psi, x, y, Q)
       endif
     enddo
-
+    
     call close_plot()
     deallocate(V, V1, V2)
   end subroutine
 
-  subroutine solve_nxt(psi, V, A, Q)
-    complex(dp), intent(inout) :: psi(:)
-    real(dp), intent(inout)    :: V(:)
-    complex(dp), intent(in)    :: A(:,:)
+  subroutine solve_nxt(psi, V, Ax, Ay, Q)
+    complex(dp), intent(inout) :: psi(:,:)
+    real(dp), intent(in)       :: V(:,:)
+    complex(dp), intent(in)    :: Ax(:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
 
-    complex(dp), allocatable :: g(:), A_tmp(:,:)
-    integer                  :: info
+    complex(dp), allocatable :: Ax_tmp(:,:), Ay_tmp(:,:,:)
 
-    allocate(A_tmp(3,Q%M), g(Q%M))
-    
     ! init temp arrays
-    A_tmp = A
-    A_tmp(2,:) = A_tmp(2,:) + 0.5_dp*i_u*Q%dt*V
+    allocate(Ax_tmp(3,Q%Mx), Ay_tmp(3,Q%My,Q%Mx))
+    Ax_tmp = Ax 
+    Ay_tmp = Ay
 
-    ! explicit part of calculation, mat-vec multiplication, using BLAS routine
-    call zgbmv('N', Q%M, Q%M, 1, 1, one, conjg(A_tmp), 3, psi, 1, zero, g, 1)
+    ! add potential to Ay matrix  
+    Ay_tmp(2,:,:) = Ay_tmp(2,:,:) + 0.5_dp*i_u*Q%dt*transpose(V)
 
-    ! solve for wavefunction at t=n+1, using LAPACK routine
-    call zgtsv(Q%M, 1, A_tmp(1,1:Q%M-1), A_tmp(2,:), A_tmp(3,1:Q%M-1), g, &
-      Q%M, info)
+    ! use Psi(n) to solve for intermediate Psi(n+1/2)
+    call a_sweep(psi, Ax_tmp, Ay_tmp, Q)
 
-    ! collect wavefunction at t=n+1
-    psi = g
+    ! reset Ax matrix
+    Ax_tmp = Ax 
 
-    deallocate(A_tmp, g)
+    ! use Psi(n+1/2) to solve for Psi(n+1)
+    call b_sweep(psi, Ax_tmp, Ay_tmp, Q)
+
+    deallocate(Ax_tmp, Ay_tmp)
   end subroutine
 
-  pure subroutine potential(V, x, t, Q)
-    real(dp), intent(inout)    :: V(:)
-    real(dp), intent(in)       :: x(:), t
+  subroutine a_sweep(psi, Ax, Ay, Q)
+    complex(dp), intent(inout) :: psi(:,:), Ax(:,:), Ay(:,:,:)
+    type(modl_par), intent(in) :: Q
+
+    complex(dp), allocatable :: g(:,:)
+    integer                  :: i, info
+    
+    allocate(g(Q%Mx,Q%My))
+
+    do i = 1,Q%Mx
+      ! explicit part of calculation, mat-vec mult, using BLAS routine
+      call zgbmv('N', Q%My, Q%My, 1, 1, one, conjg(Ay(:,:,i)), 3, &
+        psi(i,:), 1, zero, g(i,:), 1)
+    enddo
+
+    ! solve tridiagonal system for psi at t=n+1/2, using LAPACK routine
+    call zgtsv(Q%Mx, Q%My, Ax(1,1:Q%Mx-1), Ax(2,:), Ax(3,1:Q%Mx-1), &
+      g, Q%Mx, info)
+    
+    psi = g
+    deallocate(g)
+  end subroutine
+
+  subroutine b_sweep(psi, Ax, Ay, Q)
+    complex(dp), intent(inout) :: psi(:,:), Ax(:,:), Ay(:,:,:)
+    type(modl_par), intent(in) :: Q
+
+    complex(dp), allocatable :: g(:,:)
+    integer                  :: i, info
+    
+    allocate(g(Q%Mx,Q%My))
+
+    do i = 1,Q%My
+      ! explicit part of calculation, mat-vec mult, using BLAS routine
+      call zgbmv('N', Q%Mx, Q%Mx, 1, 1, one, conjg(Ax), 3, &
+        psi(:,i), 1, zero, g(:,i), 1)
+    enddo
+
+    !$omp parallel do
+    do i = 1,Q%Mx
+      ! solve tridiagonal system for psi at t=n+1, using LAPACK routine
+      call zgtsv(Q%My, 1, Ay(1,1:Q%My-1,i), Ay(2,:,i), Ay(3,1:Q%My-1,i), &
+        g(i,:), Q%My, info)
+    enddo
+    !$omp end parallel do
+    
+    psi = g
+    deallocate(g)
+  end subroutine
+
+  pure subroutine potential(V, x, y, t, Q)
+    real(dp), intent(inout)    :: V(:,:)
+    real(dp), intent(in)       :: x(:,:), y(:,:), t
     type(modl_par), intent(in) :: Q
 
     if (Q%V_type == 1) then
-      ! adiabatic change harmonic potential -> ISQW
+      ! adiabatic harmonic potential -> ISQW
       if (t < Q%tau) then
-        V = (1._dp - t/Q%tau)**2*(x-Q%L/2)**2 
+        V = (1._dp - t/Q%tau)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)
       else
         V = 0._dp
       endif
     elseif (Q%V_type == 2) then
-      ! fixed height tunnel barrier
-      V = 0._dp
-      where(abs(x-Q%L/2) < Q%L/20) V = 1._dp
+      ! single slit aperture
+      
+      ! set barrier height
+      V = 3_dp*(Q%kx**2 + Q%ky**2)
+      
+      ! set potential to zero outside of barrier
+      where(Q%Ly*0.40_dp<y .and. y<Q%Ly*0.60_dp) V = 0._dp
+      where(Q%Lx*0.49_dp>x .or. x>Q%Lx*0.51_dp) V = 0._dp
     endif
   end subroutine
 end module

@@ -6,18 +6,6 @@ module io
   public :: user_in, get_usr_args
 contains
 
-  subroutine user_in(Q)
-    type(modl_par), intent(inout) :: Q
-  
-    if (Q%V_type == 2) then
-      write(*,'(/,A,/)') '************ Input *************' 
-      write(*,'(A)',advance='no') "k = " 
-      read(*,*) Q%k
-    endif
-
-    write(*,'(A)') "Running simulation..."
-  end subroutine
-
   subroutine get_usr_args(Q)
     type(modl_par), intent(inout) :: Q
 
@@ -31,12 +19,25 @@ contains
     ! check command line arguments
     do i=1,iargc()
       call getarg(i,arg)
-      if (trim(arg) == '-t') then
+      if ((trim(arg) == '--Scatter') .or. (trim(arg) == '-s')) then
         Q%V_type = 2 ! scattering potential
       endif
       if ((trim(arg) == '--PlotRe') .or. (trim(arg) == '-r')) then
         Q%plot_re = .true. ! plot real part
       endif
     enddo
+  end subroutine
+
+  subroutine user_in(Q)
+    type(modl_par), intent(inout) :: Q
+    
+    if (Q%V_type == 2) then
+      write(*,'(/,A,/)') '************ Input *************' 
+      write(*,'(A)',advance='no') "kx = " 
+      read(*,*) Q%kx
+      write(*,'(A)',advance='no') "ky = " 
+      read(*,*) Q%ky
+    endif
+    write(*,'(A)') "Running simulation..."
   end subroutine
 end module

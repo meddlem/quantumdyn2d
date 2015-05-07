@@ -1,6 +1,6 @@
 program main
   use constants
-  use structures
+  use structures 
   use initialize
   use simulation
   use io
@@ -17,16 +17,16 @@ program main
     subroutine run_sim(Q)
       type(modl_par), intent(in) :: Q
 
-      complex(dp), allocatable :: psi(:), A(:,:)
-      real(dp), allocatable    :: x(:) 
+      complex(dp), allocatable :: psi(:,:), Ax(:,:), Ay(:,:,:)
+      real(dp), allocatable    :: x(:,:), y(:,:)
       
-      allocate(psi(Q%M), x(Q%M), A(3,Q%M))
-      call init_wavef(psi, x, Q)
-      call init_ops(A, Q)
-
-      ! time integration
-      call time_evo(psi, x, A, Q)
-
-      deallocate(psi, x, A)
+      allocate(psi(Q%Mx,Q%My), x(Q%Mx,Q%My), y(Q%Mx,Q%My), &
+        Ax(3,Q%Mx), Ay(3,Q%My,Q%Mx))
+      
+      call init_wavefunction(psi, x, y, Q)
+      call init_ops(Ax, Ay, Q) 
+      call time_evo(psi, x, y, Ax, Ay, Q)
+      
+      deallocate(psi, x, y, Ax, Ay)
     end subroutine
 end program

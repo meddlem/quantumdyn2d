@@ -17,11 +17,11 @@ program main
     subroutine run_sim(Q)
       type(modl_par), intent(in) :: Q
 
-      complex(dp), allocatable :: psi(:,:), Ax(:,:,:), Ay(:,:,:)
+      complex(dp), allocatable :: psi(:,:), Ax(:,:), Ay(:,:,:)
       real(dp), allocatable    :: x(:,:), y(:,:)
       
       allocate(psi(Q%Mx,Q%My), x(Q%Mx,Q%My), y(Q%Mx,Q%My), &
-        Ax(3,Q%Mx,Q%My), Ay(3,Q%My,Q%Mx))
+        Ax(3,Q%Mx), Ay(3,Q%My,Q%Mx))
       
       call init_wavefunction(psi, x, y, Q)
       call init_ops(Ax, Ay, Q) 

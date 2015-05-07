@@ -25,8 +25,8 @@ contains
     
     Q%Mx = floor(Q%Lx/Q%dx)
     Q%My = floor(Q%Ly/Q%dx)
-    Q%a = 0.2_dp
-    Q%N = 5000
+    Q%a = 0.01_dp
+    Q%N = 10000
   end subroutine
   
   subroutine init_wavefunction(psi, x, y, Q)
@@ -70,19 +70,21 @@ contains
   end subroutine
 
   subroutine init_ops(Ax, Ay, Q)
-    complex(dp), intent(inout) :: Ax(:,:,:), Ay(:,:,:)
+    complex(dp), intent(inout) :: Ax(:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
 
-    integer :: i
+    real(dp) :: r
+
+    r = Q%dt/Q%dx**2
 
     ! init ADI matrix operators, x-dir, band storage fmt
-    Ax(1,:,:) = -0.5_dp*i_u*Q%dt/Q%dx**2
-    Ax(2,:,:) = one + i_u*Q%dt/Q%dx**2
-    Ax(3,:,:) = Ax(1,:,:)
-    
+    Ax(1,:) = -0.5_dp*i_u*r
+    Ax(2,:) = one + i_u*r
+    Ax(3,:) = -0.5_dp*i_u*r
+
     ! init ADI matrix operators, y-dir, band storage fmt
-    do i = 1,3
-      Ay(i,:,:) = transpose(Ax(i,:,:))
-    enddo
+    Ay(1,:,:) = -0.5_dp*i_u*r
+    Ay(2,:,:) = one + i_u*r
+    Ay(3,:,:) = -0.5_dp*i_u*r
   end subroutine
 end module 

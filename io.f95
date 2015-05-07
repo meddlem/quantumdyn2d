@@ -31,11 +31,13 @@ contains
   subroutine user_in(Q)
     type(modl_par), intent(inout) :: Q
     
-    write(*,'(/,A,/)') '************ Input *************' 
-    write(*,'(A)',advance='no') "kx = " 
-    read(*,*) Q%kx
-    write(*,'(A)',advance='no') "ky = " 
-    read(*,*) Q%ky
+    if (Q%V_type == 2) then
+      write(*,'(/,A,/)') '************ Input *************' 
+      write(*,'(A)',advance='no') "kx = " 
+      read(*,*) Q%kx
+      write(*,'(A)',advance='no') "ky = " 
+      read(*,*) Q%ky
+    endif
     write(*,'(A)') "Running simulation..."
   end subroutine
 end module

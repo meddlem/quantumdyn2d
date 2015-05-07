@@ -6,25 +6,36 @@ module initialize
   public :: init_param, init_wavefunction, init_ops
 
 contains
-  subroutine init_param(Q)
+  subroutine init_param(Q, P)
     type(modl_par), intent(inout) :: Q
+    type(plt_par), intent(inout)  :: P
     
     ! model parameters
     Q%dx = 0.05_dp
     Q%dt = 0.02_dp
 
-    if (Q%V_type == 2) then
-      Q%Lx = 22._dp
-      Q%Ly = 10._dp
-      Q%plot_interval = 5
+    if (Q%V_type == 1) then
+      Q%Lx = 8._dp
+      Q%Ly = 8._dp
+      
+      P%plot_interval = 40
+      P%rng = [-0.2_dp, 0.2_dp]
+    elseif (Q%V_type == 2) then
+      Q%Lx = 40._dp
+      Q%Ly = 16._dp
       Q%Bx = Q%Lx/2
       Q%By = Q%Ly/2
       Q%Wx = Q%Lx*0.005_dp
-      Q%Wy = Q%Ly*0.05_dp
-    else
-      Q%Lx = 8._dp
-      Q%Ly = 8._dp
-      Q%plot_interval = 40
+      Q%Wy = Q%Ly*0.03_dp
+
+      P%plot_interval = 5
+      P%rng = [-1._dp, 0.2_dp]
+    elseif (Q%V_type == 3) then
+      Q%Lx = 12._dp
+      Q%Ly = 12._dp
+      
+      P%plot_interval = 3
+      P%rng = [-0.3_dp, 0.3_dp]
     endif
     
     Q%Mx = floor(Q%Lx/Q%dx)
@@ -53,13 +64,20 @@ contains
     enddo
     
     if (Q%V_type == 1) then
+      ! harmonic oscillator excited state
       r = sqrt((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) 
       Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
       A = 1._dp
-    else
+    elseif (Q%V_type == 2) then
+      ! gaussian wavepacket
       r = sqrt((x - Q%Lx/4)**2 + (y - Q%Ly/2)**2) 
       Hxy = 1._dp 
-      A = 2._dp
+      A = 1._dp
+    elseif (Q%V_type == 3) then
+      ! harmonic oscillator excited state
+      r = sqrt((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) 
+      Hxy = (4*(x - Q%Lx/2)**2 - 2._dp)*(y - Q%Ly/2) 
+      A = 1._dp
     endif
 
     ! calc wavefunction

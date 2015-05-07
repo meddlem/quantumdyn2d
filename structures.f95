@@ -21,8 +21,11 @@ module structures
     integer :: My 
     integer :: N  ! number of time steps/iterations
     integer :: V_type
-    integer :: plot_interval
+  end type
 
-    logical :: plot_re
+  type plt_par
+    integer  :: plot_interval ! number of iterations between plots
+    real(dp) :: rng(2) ! min and max value of z range (colormap)
+    logical  :: plot_re 
   end type
 end module

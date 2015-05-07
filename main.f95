@@ -7,15 +7,17 @@ program main
   implicit none
 
   type(modl_par) :: Q
+  type(plt_par)  :: P
 
-  call get_usr_args(Q)
+  call get_usr_args(Q, P)
   call user_in(Q)
-  call init_param(Q)
-  call run_sim(Q)
+  call init_param(Q, P)
+  call run_sim(Q, P)
 
   contains
-    subroutine run_sim(Q)
+    subroutine run_sim(Q, P)
       type(modl_par), intent(in) :: Q
+      type(plt_par), intent(in)  :: P
 
       complex(dp), allocatable :: psi(:,:), Ax(:,:), Ay(:,:,:)
       real(dp), allocatable    :: x(:,:), y(:,:)
@@ -25,7 +27,7 @@ program main
       
       call init_wavefunction(psi, x, y, Q)
       call init_ops(Ax, Ay, Q) 
-      call time_evo(psi, x, y, Ax, Ay, Q)
+      call time_evo(psi, x, y, Ax, Ay, Q, P)
       
       deallocate(psi, x, y, Ax, Ay)
     end subroutine

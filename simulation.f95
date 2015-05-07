@@ -8,17 +8,18 @@ module simulation
   public :: time_evo
 
 contains
-  subroutine time_evo(psi, x, y, Ax, Ay, Q)
+  subroutine time_evo(psi, x, y, Ax, Ay, Q, P)
     complex(dp), intent(inout) :: psi(:,:)
     real(dp), intent(in)       :: x(:,:), y(:,:)
     complex(dp), intent(in)    :: Ax(:,:), Ay(:,:,:)
     type(modl_par), intent(in) :: Q
+    type(plt_par), intent(in)  :: P
 
     real(dp), allocatable :: V(:,:), V1(:,:), V2(:,:)
     integer               :: i
 
     allocate(V(Q%Mx,Q%My), V1(Q%Mx,Q%My), V2(Q%Mx,Q%My))
-    call animate_plot(Q)
+    call animate_plot(Q, P)
 
     do i = 1,Q%N
       ! calculate potential using trapezoidal rule
@@ -29,8 +30,8 @@ contains
       ! time integration
       call solve_nxt(psi, V, Ax, Ay, Q)
       
-      if (mod(i,Q%plot_interval) == 0) then
-        call plot_wavef(psi, x, y, Q)
+      if (mod(i,P%plot_interval) == 0) then
+        call plot_wavef(psi, x, y, Q, P)
       endif
     enddo
     
@@ -136,8 +137,11 @@ contains
       
       ! set potential to zero outside of barrier
       where(abs(x-Q%Bx) > Q%Wx) V = 0._dp
-      where(abs(y - (Q%By + 2*Q%Wy)) < Q%Wy) V = 0._dp 
-      where(abs(y - (Q%By - 2*Q%Wy)) < Q%Wy) V = 0._dp
+      where(abs(y - (Q%By + 2_dp*Q%Wy)) < Q%Wy) V = 0._dp 
+      where(abs(y - (Q%By - 2_dp*Q%Wy)) < Q%Wy) V = 0._dp
+    elseif (Q%V_type == 3) then
+      ! harmonic potential well
+      V = (x - Q%Lx/2)**2 + (y - Q%Ly/2)**2
     endif
   end subroutine
 end module

@@ -69,10 +69,11 @@ contains
     real(dp), intent(in)       :: x(:), t
     type(modl_par), intent(in) :: Q
 
-    real(dp) :: a
-    
-    ! changing harmonic potential
-    a = 0.05_dp
-    V = (1._dp - 0.8_dp*sin(a*t))*(x-Q%L/2)**2 
+    ! adiabatic change harmonic potential -> ISQW
+    if (t < Q%tau) then
+      V = (1._dp - t/Q%tau)**2*(x-Q%L/2)**2 
+    else
+      V = 0._dp
+    endif
   end subroutine
 end module

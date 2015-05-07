@@ -12,10 +12,11 @@ contains
     ! simulation parameters
     Q%dx = 0.01_dp
     Q%dt = 0.025_dp
-    Q%L = 60._dp
+    Q%L = 12._dp
     Q%M = floor(Q%L/Q%dx)
-    Q%plot_interval = 15
-    Q%n = 5000
+    Q%plot_interval = 100
+    Q%tau = 400._dp
+    Q%n = 20000
   end subroutine
 
   subroutine init_wavef(psi, x, Q)

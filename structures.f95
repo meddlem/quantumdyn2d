@@ -9,7 +9,7 @@ module structures
     real(dp) :: L ! lattice length 
     real(dp) :: dx 
     real(dp) :: dt
-    real(dp) :: a  ! time constant potential
+    real(dp) :: tau  ! time constant potential
 
     integer :: M ! lattice points in x-dir
     integer :: N  ! number of time steps/iterations

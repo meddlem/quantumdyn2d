@@ -76,12 +76,12 @@ contains
     allocate(g(Q%Mx,Q%My))
 
     do i = 1,Q%Mx
-      ! explicit part of calculation, mat-vec multiplication
+      ! explicit part of calculation, mat-vec mult, using BLAS routine
       call zgbmv('N', Q%My, Q%My, 1, 1, one, conjg(Ay(:,:,i)), 3, &
         psi(i,:), 1, zero, g(i,:), 1)
     enddo
 
-    ! solve resulting tridiagonal system for psi at t=n+1/2
+    ! solve tridiagonal system for psi at t=n+1/2, using LAPACK routine
     call zgtsv(Q%Mx, Q%My, Ax(1,1:Q%Mx-1), Ax(2,:), Ax(3,1:Q%Mx-1), &
       g, Q%Mx, info)
     
@@ -99,14 +99,14 @@ contains
     allocate(g(Q%Mx,Q%My))
 
     do i = 1,Q%My
-      ! explicit part of calculation, mat-vec multiplication
+      ! explicit part of calculation, mat-vec mult, using BLAS routine
       call zgbmv('N', Q%Mx, Q%Mx, 1, 1, one, conjg(Ax), 3, &
         psi(:,i), 1, zero, g(:,i), 1)
     enddo
 
     !$omp parallel do
     do i = 1,Q%Mx
-      ! solve tridiagonal system for psi at t=n+1
+      ! solve tridiagonal system for psi at t=n+1, using LAPACK routine
       call zgtsv(Q%My, 1, Ay(1,1:Q%My-1,i), Ay(2,:,i), Ay(3,1:Q%My-1,i), &
         g(i,:), Q%My, info)
     enddo
@@ -132,7 +132,7 @@ contains
       ! single slit aperture
       
       ! set barrier height
-      V = 10*(Q%kx**2 + Q%ky**2)
+      V = 3_dp*(Q%kx**2 + Q%ky**2)
       
       ! set potential to zero outside of barrier
       where(Q%Ly*0.40_dp<y .and. y<Q%Ly*0.60_dp) V = 0._dp

@@ -11,7 +11,7 @@ module structures
     real(dp) :: Ly ! lattice length in y-dir
     real(dp) :: dx 
     real(dp) :: dt
-    real(dp) :: a  ! time constant potential
+    real(dp) :: tau  ! time scale adiabatic change
 
     integer :: Mx ! lattice size in x-dir
     integer :: My

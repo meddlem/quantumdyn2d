@@ -54,13 +54,13 @@ contains
     ! add potential to Ay matrix  
     Ay_tmp(2,:,:) = Ay_tmp(2,:,:) + 0.5_dp*i_u*Q%dt*transpose(V)
 
-    ! solve for intermediate Psi at t=n+1/2
+    ! use Psi(n) to solve for intermediate Psi(n+1/2)
     call a_sweep(psi, Ax_tmp, Ay_tmp, Q)
 
     ! reset Ax matrix
     Ax_tmp = Ax 
 
-    ! use Psi at t=n+1/2 to solve for Psi at t=n+1
+    ! use Psi(n+1/2) to solve for Psi(n+1)
     call b_sweep(psi, Ax_tmp, Ay_tmp, Q)
 
     deallocate(Ax_tmp, Ay_tmp)
@@ -123,8 +123,8 @@ contains
 
     if (Q%V_type == 1) then
       ! adiabatic harmonic potential -> ISQW
-      if (t < 1._dp/Q%a) then
-        V = (1._dp - Q%a*t)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)
+      if (t < 1._dp/Q%tau) then
+        V = (1._dp - Q%tau*t)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)
       else
         V = 0._dp
       endif

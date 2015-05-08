@@ -13,14 +13,17 @@ contains
     ! model parameters
     Q%dx = 0.05_dp
     Q%dt = 0.02_dp
-    Q%N = 10000
+    
+    Q%N = 6000
+    Q%Lx = 9._dp
+    Q%Ly = 9._dp
 
-    if (Q%sim_type == 'hsq') then
-      Q%Lx = 8._dp
-      Q%Ly = 8._dp
-      
+    P%plot_interval = 10
+    P%rng = [-0.2_dp, 0.2_dp]
+
+    if (any(Q%sim_type == ['hsq', 'hqa'])) then
       P%plot_interval = 40
-      P%rng = [-0.2_dp, 0.2_dp]
+    
     elseif (Q%sim_type == 'dsl') then
       Q%Lx = 35._dp
       Q%Ly = 15._dp
@@ -28,15 +31,6 @@ contains
       Q%By = Q%Ly/2
       Q%Wx = Q%Lx*0.005_dp
       Q%Wy = Q%Ly*0.03_dp
-
-      P%plot_interval = 5
-      P%rng = [-0.2_dp, 0.2_dp]
-    elseif (Q%sim_type == 'har') then
-      Q%Lx = 12._dp
-      Q%Ly = 12._dp
-      
-      P%plot_interval = 1
-      P%rng = [-0.3_dp, 0.3_dp]
     endif
     
     Q%Mx = floor(Q%Lx/Q%dx)
@@ -67,13 +61,15 @@ contains
     Hxy = 1._dp
     r = sqrt((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) 
     
-    if (Q%sim_type == 'hsq') then
+    if (any(Q%sim_type == ['hsq', 'hqa'])) then
       ! harmonic oscillator excited state
       Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
+
     elseif (Q%sim_type == 'dsl') then
       ! gaussian wavepacket
       r = sqrt((x - Q%Lx/4)**2 + (y - Q%Ly/2)**2) 
       sigma = min(Q%Lx,Q%Ly)/20._dp
+    
     elseif (Q%sim_type == 'har') then
       ! harmonic oscillator excited state
       Hxy = (4*(x - Q%Lx/2)**2 - 2._dp)*(y - Q%Ly/2) 

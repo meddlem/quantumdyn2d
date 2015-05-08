@@ -17,10 +17,10 @@ module structures
     real(dp) :: Wx ! Barrier width x-dir
     real(dp) :: Wy ! Barrier width y-dir
 
-    integer :: Mx ! number oflattice points in x-dir
-    integer :: My 
-    integer :: N  ! number of time steps/iterations
-    integer :: V_type
+    integer      :: Mx ! number oflattice points in x-dir
+    integer      :: My 
+    integer      :: N  ! number of time steps/iterations
+    character(3) :: sim_type
   end type
 
   type plt_par

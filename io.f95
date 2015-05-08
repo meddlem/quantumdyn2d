@@ -14,19 +14,22 @@ contains
     integer       :: i
 
     ! default 
-    Q%V_type = 3 ! Harmonic potential
+    Q%sim_type = 'har' ! Harmonic potential
     P%plot_re = .false. ! Plot density 
 
     ! check command line arguments
     do i=1,iargc()
       call getarg(i,arg)
-      if (trim(arg) == '-a') then
-        Q%V_type = 1 ! adiabatic potential change 
+      if (trim(arg) == '--hsq') then
+        Q%sim_type = 'hsq' ! adiabatic change: harmonic to isqw
       endif
-      if (trim(arg) == '-s') then
-        Q%V_type = 2 ! scattering potential
+      if (trim(arg) == '--dsl') then
+        Q%sim_type = 'dsl' ! scattering potential
       endif
-      if ((trim(arg) == '--PlotRe') .or. (trim(arg) == '-r')) then
+      if (trim(arg) == '--hqa') then
+        Q%sim_type = 'hqa' ! adiabatic: harmonic to quartic
+      endif
+      if (trim(arg) == '-r') then
         P%plot_re = .true. ! plot real part
       endif
     enddo
@@ -35,13 +38,17 @@ contains
   subroutine user_in(Q)
     type(modl_par), intent(inout) :: Q
     
-    if (Q%V_type == 2) then
+    if (any(Q%sim_type == ['dsl', 'har'])) then
       write(*,'(/,A,/)') '************ Input *************' 
       write(*,'(A)',advance='no') "kx = " 
       read(*,*) Q%kx
       write(*,'(A)',advance='no') "ky = " 
       read(*,*) Q%ky
+    else
+      Q%kx = 0._dp
+      Q%ky = 0._dp
     endif
+
     write(*,'(A)') "Running simulation..."
   end subroutine
 end module

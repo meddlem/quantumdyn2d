@@ -13,35 +13,35 @@ contains
     ! model parameters
     Q%dx = 0.05_dp
     Q%dt = 0.02_dp
+    Q%N = 10000
 
-    if (Q%V_type == 1) then
+    if (Q%sim_type == 'hsq') then
       Q%Lx = 8._dp
       Q%Ly = 8._dp
       
       P%plot_interval = 40
       P%rng = [-0.2_dp, 0.2_dp]
-    elseif (Q%V_type == 2) then
-      Q%Lx = 40._dp
-      Q%Ly = 16._dp
+    elseif (Q%sim_type == 'dsl') then
+      Q%Lx = 35._dp
+      Q%Ly = 15._dp
       Q%Bx = Q%Lx/2
       Q%By = Q%Ly/2
       Q%Wx = Q%Lx*0.005_dp
       Q%Wy = Q%Ly*0.03_dp
 
       P%plot_interval = 5
-      P%rng = [-1._dp, 0.2_dp]
-    elseif (Q%V_type == 3) then
+      P%rng = [-0.2_dp, 0.2_dp]
+    elseif (Q%sim_type == 'har') then
       Q%Lx = 12._dp
       Q%Ly = 12._dp
       
-      P%plot_interval = 3
+      P%plot_interval = 1
       P%rng = [-0.3_dp, 0.3_dp]
     endif
     
     Q%Mx = floor(Q%Lx/Q%dx)
     Q%My = floor(Q%Ly/Q%dx)
     Q%tau = 100._dp
-    Q%N = 10000
   end subroutine
   
   subroutine init_wavefunction(psi, x, y, Q)
@@ -50,7 +50,7 @@ contains
     type(modl_par), intent(in) :: Q
     
     real(dp), allocatable :: r(:,:), Hxy(:,:)
-    real(dp)              :: A
+    real(dp)              :: sigma
     integer               :: i, j
 
     allocate(r(Q%Mx,Q%My), Hxy(Q%Mx,Q%My))
@@ -63,25 +63,24 @@ contains
       enddo
     enddo
     
-    if (Q%V_type == 1) then
+    sigma = 1._dp
+    Hxy = 1._dp
+    r = sqrt((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) 
+    
+    if (Q%sim_type == 'hsq') then
       ! harmonic oscillator excited state
-      r = sqrt((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) 
       Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
-      A = 1._dp
-    elseif (Q%V_type == 2) then
+    elseif (Q%sim_type == 'dsl') then
       ! gaussian wavepacket
       r = sqrt((x - Q%Lx/4)**2 + (y - Q%Ly/2)**2) 
-      Hxy = 1._dp 
-      A = 1._dp
-    elseif (Q%V_type == 3) then
+      sigma = min(Q%Lx,Q%Ly)/20._dp
+    elseif (Q%sim_type == 'har') then
       ! harmonic oscillator excited state
-      r = sqrt((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) 
       Hxy = (4*(x - Q%Lx/2)**2 - 2._dp)*(y - Q%Ly/2) 
-      A = 1._dp
     endif
 
     ! calc wavefunction
-    psi = Hxy*exp(-0.5_dp*A*r**2)*exp(i_u*(Q%kx*x + Q%ky*y))
+    psi = Hxy*exp(-0.5_dp*r**2/sigma**2)*exp(i_u*(Q%kx*x + Q%ky*y))
 
     ! normalize wavefunction
     psi = psi/sqrt(sum(abs(psi)**2*Q%dx**2))

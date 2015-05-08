@@ -122,14 +122,15 @@ contains
     real(dp), intent(in)       :: x(:,:), y(:,:), t
     type(modl_par), intent(in) :: Q
 
-    if (Q%V_type == 1) then
+    if (Q%sim_type == 'hsq') then
       ! adiabatic harmonic potential -> ISQW
       if (t < Q%tau) then
         V = (1._dp - t/Q%tau)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)
       else
         V = 0._dp
       endif
-    elseif (Q%V_type == 2) then
+
+    elseif (Q%sim_type == 'dsl') then
       ! single slit aperture
       
       ! set barrier height
@@ -139,7 +140,8 @@ contains
       where(abs(x-Q%Bx) > Q%Wx) V = 0._dp
       where(abs(y - (Q%By + 2_dp*Q%Wy)) < Q%Wy) V = 0._dp 
       where(abs(y - (Q%By - 2_dp*Q%Wy)) < Q%Wy) V = 0._dp
-    elseif (Q%V_type == 3) then
+
+    elseif (Q%sim_type == 'har') then
       ! harmonic potential well
       V = (x - Q%Lx/2)**2 + (y - Q%Ly/2)**2
     endif

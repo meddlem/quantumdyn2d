@@ -60,11 +60,12 @@ contains
 
     rfmt = '(F10.5,1X,F10.5,1X,F10.5)' 
     
+    ! write plotdata to fifo pipe
     if (P%plot_re) then
       open(11,access = 'sequential',status = 'replace',file = 'plotfifo.dat')
         do i = 1,Q%Mx
           do j = 1,Q%My
-            write(11,rfmt) x(i,j), y(i,j), real(psi(i,j)) ! write plot data
+            write(11,rfmt) x(i,j), y(i,j), real(psi(i,j)) 
           enddo
           write(11,*) '' ! add space between different xvals, for gnuplot
         enddo
@@ -73,7 +74,7 @@ contains
       open(11,access = 'sequential',status = 'replace',file = 'plotfifo.dat')
         do i = 1,Q%Mx
           do j = 1,Q%My
-            write(11,rfmt) x(i,j), y(i,j), abs(psi(i,j))**2 ! write plot data
+            write(11,rfmt) x(i,j), y(i,j), abs(psi(i,j))**2 
           enddo
           write(11,*) '' ! add space between different xvals, for gnuplot
         enddo

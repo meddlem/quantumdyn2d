@@ -13,7 +13,7 @@ contains
     character(10) :: arg
     integer       :: i
 
-    ! default 
+    ! defaults 
     Q%sim_type = 'har' ! Harmonic potential
     P%plot_re = .false. ! Plot density 
 

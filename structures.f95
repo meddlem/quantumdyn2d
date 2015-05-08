@@ -17,13 +17,14 @@ module structures
     real(dp) :: Wx ! Barrier width x-dir
     real(dp) :: Wy ! Barrier width y-dir
 
-    integer      :: Mx ! number oflattice points in x-dir
+    integer      :: Mx ! number of lattice points in x-dir
     integer      :: My 
     integer      :: N  ! number of time steps/iterations
     character(3) :: sim_type
   end type
 
   type plt_par
+    ! data type that contains all plot parameters
     integer  :: plot_interval ! number of iterations between plots
     real(dp) :: rng(2) ! min and max value of z range (colormap)
     logical  :: plot_re 

@@ -44,7 +44,7 @@ contains
       endif
       
       if (mod(i,P%plot_interval) == 0) then
-        call plot_wavef(psi, x, y, Q, P)
+        call plot_wavef(psi, Q, P)
       endif
     enddo
     

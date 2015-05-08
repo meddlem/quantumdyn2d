@@ -46,6 +46,8 @@ contains
       if (mod(i,P%plot_interval) == 0) then
         call plot_wavef(psi, Q, P)
       endif
+
+      if (mod(i,1000) == 0) write(*,'(A,I0)') 'i = ', i
     enddo
     
     call close_plot()

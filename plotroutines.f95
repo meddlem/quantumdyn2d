@@ -67,8 +67,8 @@ contains
       close(11)
     else
       open(11,access = 'sequential',status = 'replace',file = 'plotfifo.dat')
-        do i = 1,Q%Mx
-          write(11,rfmt) (real(psi(i,j)), j=1,Q%My)
+        do i = 1,Q%My
+          write(11,rfmt) (real(psi(j,i)), j=1,Q%Mx)
         enddo
       close(11)
     endif

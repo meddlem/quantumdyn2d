@@ -22,11 +22,11 @@ contains
     P%rng = [-0.2_dp, 0.2_dp]
 
     if (any(Q%sim_type == ['hsq', 'hqa'])) then
-      P%plot_interval = 40
+      P%plot_interval = 20
     
     elseif (Q%sim_type == 'dsl') then
-      Q%Lx = 35._dp
-      Q%Ly = 15._dp
+      Q%Lx = 30._dp
+      Q%Ly = 13._dp
       Q%Bx = Q%Lx/2
       Q%By = Q%Ly/2
       Q%Wx = Q%Lx*0.005_dp
@@ -66,7 +66,7 @@ contains
       Hxy = (x - Q%Lx/2)*(y - Q%Ly/2)
 
     elseif (Q%sim_type == 'dsl') then
-      ! gaussian wavepacket
+      ! gaussian wavepacket, starting off center
       r = sqrt((x - Q%Lx/4)**2 + (y - Q%Ly/2)**2) 
       sigma = min(Q%Lx,Q%Ly)/20._dp
     

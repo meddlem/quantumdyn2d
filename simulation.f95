@@ -16,10 +16,15 @@ contains
     type(plt_par), intent(in)  :: P
 
     real(dp), allocatable :: V(:,:), V1(:,:), V2(:,:)
+    real(dp)              :: vx, vy, t
     integer               :: i
 
     allocate(V(Q%Mx,Q%My), V1(Q%Mx,Q%My), V2(Q%Mx,Q%My))
     call animate_plot(Q, P)
+
+    ! average velocity of wavepacket in x and y dirs
+    vx = 2*Q%kx
+    vy = 2*Q%ky
 
     do i = 1,Q%N
       ! calculate potential using trapezoidal rule
@@ -29,6 +34,14 @@ contains
 
       ! time integration
       call solve_nxt(psi, V, Ax, Ay, Q)
+
+      if (Q%sim_type == 'dsl') then
+        t = i*Q%dt
+        if ((abs(vx*t) > Q%Lx/2) .or. (abs(vy*t) > Q%Ly/4)) then
+          ! stop iteration when wavepacket comes too close to boundaries
+          exit
+        endif
+      endif
       
       if (mod(i,P%plot_interval) == 0) then
         call plot_wavef(psi, x, y, Q, P)

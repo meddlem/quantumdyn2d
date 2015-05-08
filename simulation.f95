@@ -161,9 +161,9 @@ contains
       V = 20_dp*(Q%kx**2 + Q%ky**2)
       
       ! set potential to zero outside of barrier
-      where(abs(x-Q%Bx) > Q%Wx) V = 0._dp
-      where(abs(y - (Q%By + 2_dp*Q%Wy)) < Q%Wy) V = 0._dp 
-      where(abs(y - (Q%By - 2_dp*Q%Wy)) < Q%Wy) V = 0._dp
+      where(abs(x - Q%Lx/2) > Q%Wx) V = 0._dp
+      where(abs(y - (Q%Ly/2 + Q%D)) < Q%Wy) V = 0._dp 
+      where(abs(y - (Q%Ly/2 - Q%D)) < Q%Wy) V = 0._dp
 
     elseif (Q%sim_type == 'har') then
       ! harmonic potential well

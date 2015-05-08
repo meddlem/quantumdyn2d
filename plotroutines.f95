@@ -39,7 +39,8 @@ contains
     
     ! create plot/animate instruction
     open(10,access = 'sequential', file = 'loop.plt')
-      write(10,*) 'splot "< cat plotfifo.dat" u ($1*dx):($2*dx):3 matrix with image notitle'
+      write(10,*) 'splot "< cat plotfifo.dat" u ($1*dx):($2*dx):3 matrix \'
+      write(10,*) 'with image notitle'
       write(10,*) 'pause 0.2'
       write(10,*) 'reread'
     close(10)

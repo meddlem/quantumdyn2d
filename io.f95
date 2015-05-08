@@ -13,10 +13,6 @@ contains
     character(10) :: arg
     integer       :: i
 
-    ! defaults 
-    Q%sim_type = 'har' ! Harmonic potential
-    P%plot_re = .false. ! Plot density 
-
     ! check command line arguments
     do i=1,iargc()
       call getarg(i,arg)
@@ -44,9 +40,6 @@ contains
       read(*,*) Q%kx
       write(*,'(A)',advance='no') "ky = " 
       read(*,*) Q%ky
-    else
-      Q%kx = 0._dp
-      Q%ky = 0._dp
     endif
 
     write(*,'(A)') "Running simulation..."

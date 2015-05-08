@@ -11,26 +11,6 @@ contains
     type(modl_par), intent(inout) :: Q
     type(plt_par), intent(inout)  :: P
     
-    ! spatial and time discretization steps
-    Q%dx = 0.05_dp
-    Q%dt = 0.02_dp
-    
-    ! time constant for adiabatic change of potential
-    Q%tau = 100._dp
-    
-    ! number of iterations
-    Q%N = 6000
-    
-    ! lattice length in x and y dirs 
-    Q%Lx = 9._dp
-    Q%Ly = 9._dp
-
-    ! number of iterations between plot 
-    P%plot_interval = 10
-
-    ! min and max z value (colormap)
-    P%rng = [-0.2_dp, 0.2_dp]
-
     if (any(Q%sim_type == ['hsq', 'hqa'])) then
       P%plot_interval = 20
     
@@ -38,10 +18,9 @@ contains
       Q%Lx = 30._dp
       Q%Ly = 13._dp
 
-      Q%Bx = Q%Lx/2
-      Q%By = Q%Ly/2
       Q%Wx = Q%Lx*0.005_dp
-      Q%Wy = Q%Ly*0.03_dp
+      Q%Wy = Q%Ly*0.05_dp
+      Q%D = 2*Q%Wy
     endif
     
     ! number of points in x and y dir

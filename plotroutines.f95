@@ -18,6 +18,7 @@ contains
     
     ! create a gnuplot command file
     open(10,access = 'sequential',file = 'matplot.plt')
+      write(10,*) 'set term x11'
       write(10,*) 'set palette defined ( 0 "#000090", 1 "#000fff",\' 
       write(10,*) '2 "#0090ff", 3 "#0fffee", 4 "#90ff70", 5 "#ffee00",\' 
       write(10,*) '6 "#ff7000", 7 "#ee0000", 8 "#7f0000")'
@@ -68,13 +69,13 @@ contains
 
     ! write plotdata to fifo pipe
     if (.not. P%plot_re) then
-      open(11,access = 'sequential',status = 'replace',file = filename)
+      open(11,status = 'replace',file = filename)
         do i = 1,Q%My
           write(11,rfmt) (abs(psi(j,i))**2, j=1,Q%Mx)
         enddo
       close(11)
     else
-      open(11,access = 'sequential',status = 'replace',file = 'plotfifo.dat')
+      open(11,status = 'replace',file = 'plotfifo.dat')
         do i = 1,Q%My
           write(11,rfmt) (real(psi(j,i)), j=1,Q%Mx)
         enddo

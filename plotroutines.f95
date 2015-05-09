@@ -97,12 +97,12 @@ contains
     integer       :: ret
     character(40) :: filename
 
-    write(filename,'(A,I0,A)') 'set output "plot',pl_no,'.eps"'
+    write(filename,'(A,I0,A)') 'set output "plot',pl_no,'.png"'
     
     ! create a gnuplot command file
     open(10,access = 'sequential',file = 'wf.plt')
-      !write(10,*) 'set term pngcairo size 640,480'
-      write(10,*) 'set term epscairo size 12cm,9cm enhanced font "Verdana,15"'
+      write(10,*) 'set term pngcairo size 640,480'
+      !write(10,*) 'set term epscairo size 12cm,9cm enhanced font "Verdana,15"'
       write(10,*) filename
       write(10,*) 'set palette defined ( 0 "#000090", 1 "#000fff",\' 
       write(10,*) '2 "#0090ff", 3 "#0fffee", 4 "#90ff70", 5 "#ffee00",\' 

@@ -20,7 +20,6 @@ contains
       write(10,*) 'set palette defined ( 0 "#000090", 1 "#000fff",\' 
       write(10,*) '2 "#0090ff", 3 "#0fffee", 4 "#90ff70", 5 "#ffee00",\' 
       write(10,*) '6 "#ff7000", 7 "#ee0000", 8 "#7f0000")'
-      write(10,*) 'set pm3d map'
       write(10,*) 'set size ratio', Q%Ly/Q%Lx
       write(10,*) 'dx =', Q%dx
       write(10,*) 'set xrange [0:',Q%Lx,']'
@@ -39,7 +38,7 @@ contains
     
     ! create plot/animate instruction
     open(10,access = 'sequential', file = 'loop.plt')
-      write(10,*) 'splot "< cat plotfifo.dat" u ($1*dx):($2*dx):3 matrix \'
+      write(10,*) 'plot "< cat plotfifo.dat" u ($1*dx):($2*dx):3 matrix \'
       write(10,*) 'with image notitle'
       write(10,*) 'pause 0.2'
       write(10,*) 'reread'

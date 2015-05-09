@@ -50,6 +50,8 @@ contains
       if (mod(i,1000) == 0) write(*,'(A,I0)') 'i = ', i
     enddo
     
+    ! make final plot
+    call plot_wavef(psi, Q, P)
     call close_plot()
     deallocate(V, V1, V2)
   end subroutine

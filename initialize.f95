@@ -80,16 +80,16 @@ contains
 
     real(dp) :: r
 
-    r = Q%dt/Q%dx**2
+    r = Q%dt/(2._dp*Q%dx**2)
 
     ! init ADI matrix operators, x-dir, band storage fmt
-    Ax(1,:) = -0.5_dp*i_u*r
-    Ax(2,:) = one + i_u*r
-    Ax(3,:) = -0.5_dp*i_u*r
+    Ax(1,:) = -i_u*r
+    Ax(2,:) = one + 2._dp*i_u*r
+    Ax(3,:) = -i_u*r
 
     ! init ADI matrix operators, y-dir, band storage fmt
-    Ay(1,:,:) = -0.5_dp*i_u*r
-    Ay(2,:,:) = one + i_u*r
-    Ay(3,:,:) = -0.5_dp*i_u*r
+    Ay(1,:,:) = -i_u*r
+    Ay(2,:,:) = one + 2._dp*i_u*r
+    Ay(3,:,:) = -i_u*r
   end subroutine
 end module 

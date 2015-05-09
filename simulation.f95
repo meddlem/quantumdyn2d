@@ -44,15 +44,16 @@ contains
       endif
       
       if (mod(i,P%plot_interval) == 0) then
-        call plot_wavef(psi, Q, P)
+        call plot_wavef(psi, Q, P, .true.)
       endif
 
       if (mod(i,1000) == 0) write(*,'(A,I0)') 'i = ', i
     enddo
     
     ! make final plot
-    call plot_wavef(psi, Q, P)
+    call plot_wavef(psi, Q, P, .false.)
     call close_plot()
+    call p_plot(psi, Q, P)
     deallocate(V, V1, V2)
   end subroutine
 
@@ -142,7 +143,7 @@ contains
     if (Q%sim_type == 'hsq') then
       ! adiabatic harmonic potential -> ISQW
       if (t < Q%tau) then
-        V = (1._dp - t/Q%tau)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)
+        V = (1 - t/Q%tau)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)
       else
         V = 0._dp
       endif
@@ -150,7 +151,7 @@ contains
     elseif (Q%sim_type == 'hqa') then
       ! adiabatic harmonic potential -> quartic potential
       if (t < Q%tau) then
-        V = (1._dp - t/Q%tau)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) + &
+        V = (1 - t/Q%tau)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) + &
           (t/Q%tau)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)**2
       else
         V = ((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)**2
@@ -160,7 +161,7 @@ contains
       ! single slit aperture
       
       ! set barrier height
-      V = 20_dp*(Q%kx**2 + Q%ky**2)
+      V = 20._dp*(Q%kx**2 + Q%ky**2)
       
       ! set potential to zero outside of barrier
       where(abs(x - Q%Lx/2) > Q%Wx) V = 0._dp

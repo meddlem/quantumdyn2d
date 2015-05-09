@@ -151,9 +151,9 @@ contains
       ! adiabatic harmonic potential -> quartic potential
       if (t < Q%tau) then
         V = (1._dp - t/Q%tau)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2) + &
-          t/Q%tau*((x - Q%Lx/2)**4 + (y - Q%Ly/2)**4)
+          (t/Q%tau)**2*((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)**2
       else
-        V = (x - Q%Lx/2)**4 + (y - Q%Ly/2)**4
+        V = ((x - Q%Lx/2)**2 + (y - Q%Ly/2)**2)**2
       endif
 
     elseif (Q%sim_type == 'dsl') then

@@ -12,7 +12,7 @@ contains
     type(plt_par), intent(inout)  :: P
     
     if (any(Q%sim_type == ['hsq', 'hqa'])) then
-      P%plot_interval = 20
+      P%plot_interval = 50
     
     elseif (Q%sim_type == 'dsl') then
       Q%Lx = 30._dp

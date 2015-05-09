@@ -11,6 +11,7 @@ contains
     type(modl_par), intent(inout) :: Q
     type(plt_par), intent(inout)  :: P
     
+!    P%rng = [-0.1_dp,0.11_dp]
     if (any(Q%sim_type == ['hsq', 'hqa'])) then
       P%plot_interval = 50
     

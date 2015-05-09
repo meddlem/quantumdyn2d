@@ -3,7 +3,7 @@ module plotroutines
   use structures 
   implicit none
   private
-  public :: plot_wavef, close_plot, animate_plot, p_plot
+  public :: plot_wavef, close_plot, animate_plot, snapshot
 
 contains
   subroutine animate_plot(Q, P)
@@ -87,18 +87,23 @@ contains
     call system('rm -f plotfifo.dat')
   end subroutine
 
-  subroutine p_plot(psi, Q, P)
+  subroutine snapshot(psi, Q, P, pl_no)
     ! creates single plot off wavefunction
     complex(dp), intent(in)    :: psi(:,:)
     type(modl_par), intent(in) :: Q
     type(plt_par), intent(in)  :: P
+    integer, intent(in)        :: pl_no
 
-    integer :: ret
+    integer       :: ret
+    character(40) :: filename
+
+    write(filename,'(A,I0,A)') 'set output "plot',pl_no,'.eps"'
     
     ! create a gnuplot command file
     open(10,access = 'sequential',file = 'wf.plt')
-      write(10,*) 'set term pngcairo size 640,480'
-      write(10,*) 'set output "plot.png"'
+      !write(10,*) 'set term pngcairo size 640,480'
+      write(10,*) 'set term epscairo size 12cm,9cm enhanced font "Verdana,15"'
+      write(10,*) filename
       write(10,*) 'set palette defined ( 0 "#000090", 1 "#000fff",\' 
       write(10,*) '2 "#0090ff", 3 "#0fffee", 4 "#90ff70", 5 "#ffee00",\' 
       write(10,*) '6 "#ff7000", 7 "#ee0000", 8 "#7f0000")'

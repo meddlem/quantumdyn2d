@@ -20,6 +20,10 @@ contains
     integer               :: i
 
     allocate(V(Q%Mx,Q%My), V1(Q%Mx,Q%My), V2(Q%Mx,Q%My))
+    ! init potential
+    call potential(V, x, y, 0._dp, Q) 
+    ! initial plot
+    call snapshot(psi, Q, P, 1)
     call animate_plot(Q, P)
 
     ! average velocity of wavepacket in x and y dirs
@@ -28,9 +32,11 @@ contains
 
     do i = 1,Q%N
       ! calculate potential using trapezoidal rule
-      call potential(V1, x, y, i*Q%dt, Q) 
-      call potential(V2, x, y, (i+1)*Q%dt, Q) 
-      V = 0.5_dp*(V1 + V2)
+      if (any(Q%sim_type == ['hsq', 'hqa'])) then
+        call potential(V1, x, y, i*Q%dt, Q) 
+        call potential(V2, x, y, (i+1)*Q%dt, Q) 
+        V = 0.5_dp*(V1 + V2)
+      endif
 
       ! time integration
       call solve_nxt(psi, V, Ax, Ay, Q)
@@ -53,7 +59,7 @@ contains
     ! make final plot
     call plot_wavef(psi, Q, P, .false.)
     call close_plot()
-    call p_plot(psi, Q, P)
+    call snapshot(psi, Q, P, 2)
     deallocate(V, V1, V2)
   end subroutine
 

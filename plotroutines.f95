@@ -18,7 +18,7 @@ contains
     
     ! create a gnuplot command file
     open(10,access = 'sequential',file = 'matplot.plt')
-      write(10,*) 'set term x11'
+      ! write(10,*) 'set term x11' ! uncomment line in case of errors
       write(10,*) 'set palette defined ( 0 "#000090", 1 "#000fff",\' 
       write(10,*) '2 "#0090ff", 3 "#0fffee", 4 "#90ff70", 5 "#ffee00",\' 
       write(10,*) '6 "#ff7000", 7 "#ee0000", 8 "#7f0000")'
